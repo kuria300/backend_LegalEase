@@ -6,7 +6,7 @@ const openai = new OpenAI({
 
 const testConnection = async () => {
     try {
-        await api.models.list();
+        await openai.models.list();
         console.log('Connection to OpenAI API successful!');
     }
     catch (error) {
