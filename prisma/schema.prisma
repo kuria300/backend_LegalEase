@@ -1,16 +1,60 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./src/generated/prisma"
-  generatedFileExtension = "js"
-  moduleFormat           = "cjs"
+  output   = "../src/generated/prisma"
 }
-  
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  LAWYER
+  ADMIN
+}
+
+model User {
+  id          String    @id @default(uuid())
+  first_name  String
+  second_name String
+  email       String    @unique
+  role        UserRole  @default(USER)
+  dob         DateTime?
+  created_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  lawyerApplication LawyerApplication?
+}
+
+model LawyerApplication {
+  id         String   @id @default(uuid())
+  user_id    String   @unique
+  file_url   String
+  lsk_number String
+  created_at DateTime @default(now())
+  status     String
+
+  user          User           @relation(fields: [user_id], references: [id])
+  lawyerProfile LawyerProfile?
+}
+
+model LawyerProfile {
+  id                    String   @id @default(uuid())
+  lawyer_application_id String   @unique
+  category              String
+  phone_number          String
+  description           String
+  created_at            DateTime @default(now())
+  experience            Int
+  consultation_fee      Int
+  is_active             Boolean  @default(true)
+
+  lawyerApplication LawyerApplication @relation(fields: [lawyer_application_id], references: [id])
 }
