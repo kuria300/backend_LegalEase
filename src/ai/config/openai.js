@@ -1,9 +1,13 @@
+//ensure you have the OpenAI package installed and your API key set in the environment variables before using this code.
+
 const OpenAI = require('openai');
 
+// Initialize the OpenAI client with the API key from environment variables
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Function to test the connection to the OpenAI API by listing the available models
 const testConnection = async () => {
     try {
         await openai.models.list();
@@ -19,3 +23,9 @@ module.exports = {
     testConnection,
 };
 
+
+/*
+    * This code initializes the OpenAI client with the API key from environment variables.
+    *  It also includes a function to test the connection to the OpenAI API.
+    * The testConnection function attempts to list the available models from the OpenAI API and logs whether the connection was successful or if it failed, along with the error message.
+ */
