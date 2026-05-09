@@ -14,3 +14,34 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  user
+  lawyer
+  admin
+}
+
+model User {
+  id          String    @id @default(uuid())
+  first_name  String
+  second_name String
+  email       String    @unique
+  role        Role      @default(user)
+  dob         DateTime?
+  created_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  password    Password?
+
+  @@map("users")
+}
+
+model Password {
+  id       String @id @default(uuid())
+  user_id  String @unique
+  password String
+
+  user     User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("passwords")
+}
