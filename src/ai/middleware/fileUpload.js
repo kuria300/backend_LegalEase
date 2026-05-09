@@ -57,7 +57,8 @@ module.exports = {
     *  The middleware also includes error handling for multer-specific errors, such as file size limits. 
     * The upload middleware can be used in routes to handle file uploads from client-side forms.
  */
+
+//THE FOLLOWING INSTALLATION ARE MADE IN THIS FILE
 /*
-200 => success
-400 => bad request (e.g., invalid file type, file size exceeds limit)
+    * npm install multer
 */
