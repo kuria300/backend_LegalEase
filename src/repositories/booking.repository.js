@@ -10,7 +10,7 @@ const createBooking = async (data) => {
                 lawyer_id: data.lawyer_id,
                 date: data.date,
                 booking_status: {
-                    notIn: ["Cancelled"]
+                    notIn: ["cancelled"]
                 }
             }
         });
@@ -26,8 +26,8 @@ const createBooking = async (data) => {
                 lawyer_id: data.lawyer_id,
                 date: data.date,
                 notes: data.notes,
-                payment_status: "Pending Payment",
-                booking_status: "Pending"
+                payment_status: "pending",
+                booking_status: "pending"
             }
         });
         return booking;
