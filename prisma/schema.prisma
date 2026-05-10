@@ -14,3 +14,21 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Bookings {
+  id String @id @default(uuid())
+  user_id String
+  lawyer_id String
+  date DateTime
+  payment_status String @default("Pending Payment")
+  booking_status String @default("Pending")
+  notes String?
+
+  // relation with Users, LawyerProfile, Payments, and Documents
+  user Users @relation(fields: [user_id], references:[id])
+  lawyer LawyerProfile @relation(fields: [lawyer_id], references: [id])
+  payments Payments[]
+  documents Documents[]
+
+  @@map("bookings")
+}
