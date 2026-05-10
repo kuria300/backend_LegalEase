@@ -1,34 +1,40 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "./src/generated/prisma"
+  provider               = "prisma-client-js"
+  output                 = "./src/generated/prisma"
   generatedFileExtension = "js"
   moduleFormat           = "cjs"
 }
-  
 
 datasource db {
   provider = "postgresql"
 }
 
-model Bookings {
-  id String @id @default(uuid())
-  user_id String
-  lawyer_id String
-  date DateTime
-  payment_status String @default("Pending Payment")
-  booking_status String @default("Pending")
-  notes String?
+model bookings {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String         @db.Uuid
+  lawyer_id      String         @db.Uuid
+  date           DateTime       @db.Timestamp(6)
+  payment_status PaymentStatus  @default(pending)
+  booking_status BookingStatus  @default(pending)
+  notes          String?        @db.VarChar
+  lawyer_profile lawyer_profile @relation(fields: [lawyer_id], references: [id])
+  users          users          @relation(fields: [user_id], references: [id])
+  documents      documents[]
+  payments       payments?
 
-  // relation with Users, LawyerProfile, Payments, and Documents
-  user Users @relation(fields: [user_id], references:[id])
-  lawyer LawyerProfile @relation(fields: [lawyer_id], references: [id])
-  payments Payments[]
-  documents Documents[]
+  @@index([lawyer_id])
+  @@index([user_id])
+}
 
-  @@map("bookings")
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
 }
