@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
     "dev": "nodemon app.js",
     "start": "node app.js"
   },
@@ -40,7 +40,9 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "jest": "^30.4.2",
     "nodemon": "^3.1.14",
-    "prisma": "^7.8.0"
+    "prisma": "^7.8.0",
+    "supertest": "^7.2.2"
   }
 }

@@ -40,6 +40,7 @@ if(cluster.isPrimary){
 
     const app= express()
 
+    app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
 
     app.listen(PORT, ()=>{
