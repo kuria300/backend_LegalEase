@@ -14,7 +14,7 @@ const chatLimiter = rateLimit({
     max: 50, //limit of 50 requests per windowMs (you can adjust this number based on your needs)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    handler: (req, res) => {
+    handler: (req, res, next) => {
         // This function is called when a user exceeds the rate limit
         next(new ErrorResponse('Too many requests, please try again after 15 minutes.', 429));
     },
@@ -26,10 +26,9 @@ const uploadLimiter = rateLimit({
     max: 10, // limit of 10 requests per windowMs
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
+    handler: (req, res, next) => {
         // This function is called when a user exceeds the rate limit
         next(new ErrorResponse('Too many requests, please try again after 15 minutes.', 429));
-
     },
 });
 
