@@ -1,6 +1,6 @@
 require('dotenv').config();
 import jwt from "jsonwebtoken";
-import { verifyToken } from "../utils/jwt";
+import { verifyToken } from "../utils/jwt.utils";
 
 //Verifes the JWT in the authorization header
 //on success , attaches decoded payload to req.user on failure, returns 401
