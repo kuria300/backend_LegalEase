@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const lawyerCtrl = require('../controllers/lawyerContoller');
+const {applyToBeLawyer}= require('../controllers/lawyerController');
 
-router.post('/apply', lawyerController.applyToBeLayer);
+router.post("/",applyToBeLawyer);
 
-modules.exports = router;
+module.exports = router;

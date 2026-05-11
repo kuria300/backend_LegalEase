@@ -1,5 +1,5 @@
 const express = require('express')
-
+const lawyerRoutes = require("./src/routes/lawyerRoutes")
 const cluster = require('node:cluster')
 const os = require('os')
 const process = require('node:process')
@@ -39,9 +39,18 @@ if(cluster.isPrimary){
 }else{
 
     const app= express()
+  
+
+    app.use(express.json())
+
+    app.use(express.urlencoded({extended: true}))
+
+    app.use("/apply", lawyerRoutes)
+
+    
+
 
     app.use(errorHandler)
-
     app.listen(PORT, ()=>{
         console.log(`server running on port ${PORT}`)
     })
