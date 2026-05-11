@@ -1,6 +1,6 @@
 // Used multer for handling file uploads from the client- side form to a server.
 const multer = require('multer');
-const ErrorResponse = require('../utils/errorObj.js'); // Custom error response class for handling errors in the application
+const ErrorResponse = require('../utils/ErrorObj.js'); // Custom error response class for handling errors in the application
 
 // Set up multer storage configuration to store uploaded files in memory (you can also configure it to store files on disk if needed)
 

@@ -23,6 +23,10 @@ module.exports = {
     testConnection,
 };
 
+//i want to know if the connection to the OpenAI API is successful when I start my application, so I'll call the testConnection function here to check the connection.
+//  If the connection is successful, it will log a success message; otherwise, it will log an error message with the details of the failure.
+testConnection();
+
 
 /*
     * This code initializes the OpenAI client with the API key from environment variables.
