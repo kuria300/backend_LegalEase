@@ -15,6 +15,108 @@ datasource db {
   provider = "postgresql"
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bookings {
+  id                              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  date                            DateTime
+  payment_status                  payment_status @default(PENDING)
+  notes                           String?        @db.VarChar(1000)
+  booking_status                  booking_status @default(PENDING)
+  user_id                         String         @db.Uuid
+  lawyer_id                       String         @db.Uuid
+  users_bookings_lawyer_idTousers users          @relation("bookings_lawyer_idTousers", fields: [lawyer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_bookings_user_idTousers   users          @relation("bookings_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  documents                       documents[]
+  payments                        payments?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model chatbots {
+  id          String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category    String @db.VarChar(255)
+  chat        String
+  ai_response String
+  user_id     String @db.Uuid
+  users       users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model documents {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  file_url    String   @db.VarChar(500)
+  uploaded_at DateTime @default(now())
+  user_id     String   @db.Uuid
+  booking_id  String   @db.Uuid
+  bookings    bookings @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users       users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model lawyer_applications {
+  id              String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  file_url        String           @db.VarChar(500)
+  lsk_number      String           @db.VarChar(255)
+  created_at      DateTime         @default(now())
+  user_id         String           @unique @db.Uuid
+  users           users            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  lawyer_profiles lawyer_profiles?
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model lawyer_profiles {
+  id                    String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  category              String              @db.VarChar(255)
+  phone_number          String              @db.VarChar(20)
+  description           String              @db.VarChar(1000)
+  created_at            DateTime            @default(now())
+  experience            Int
+  consultation_fee      Int
+  is_active             Boolean             @default(false)
+  lawyer_application_id String              @unique @db.Uuid
+  lawyer_applications   lawyer_applications @relation(fields: [lawyer_application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model passwords {
+  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  password String @db.VarChar(255)
+  user_id  String @unique @db.Uuid
+  users    users  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model payments {
+  id                  String                     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  checkout_request_id String                     @db.VarChar(255)
+  number              String                     @db.VarChar(20)
+  amount              Decimal                    @db.Decimal(10, 2)
+  mpesa_receipts      String?                    @db.VarChar(255)
+  status              payment_transaction_status @default(PENDING)
+  created_at          DateTime                   @default(now())
+  booking_id          String                     @unique(map: "idx_payments_one_pending", where: raw("(status = 'PENDING'::payment_transaction_status)")) @db.Uuid
+  bookings            bookings                   @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id                                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  first_name                         String
+  second_name                        String
+  email                              String               @unique @db.VarChar(255)
+  role                               Role                 @default(CLIENT)
+  dob                                DateTime
+  created_at                         DateTime             @default(now())
+  deleted_at                         DateTime?
+  otp_hash                           String?              @db.VarChar(255)
+  otp_expires_at                     DateTime?            @db.Date
+  bookings_bookings_lawyer_idTousers bookings[]           @relation("bookings_lawyer_idTousers")
+  bookings_bookings_user_idTousers   bookings[]           @relation("bookings_user_idTousers")
+  chatbots                           chatbots[]
+  documents                          documents[]
+  lawyer_applications                lawyer_applications?
+  passwords                          passwords?
+}
+
 enum Role {
   CLIENT
   LAWYER
@@ -38,126 +140,4 @@ enum payment_transaction_status {
   PENDING
   SUCCESS
   FAILED
-}
-
-// Models
-
-model User {
-  id             String    @id @default(uuid()) @db.Uuid
-  first_name     String
-  second_name    String
-  email          String    @unique @db.VarChar(255)
-  role           Role      @default(CLIENT)
-  dob            DateTime
-  created_at     DateTime  @default(now())
-  deleted_at     DateTime?
-  otp_hash       String?   @db.VarChar(255)
-  otp_expires_at DateTime? @db.Date
-
-  // Relations
-  password          Password?
-  chatbots          ChatBot[]
-  bookings          Booking[]          @relation("UserBookings")
-  lawyerBookings    Booking[]          @relation("LawyerBookings")
-  lawyerApplication LawyerApplication?
-  documents         Document[]
-
-  @@map("users")
-}
-
-model Password {
-  id       String @id @default(uuid()) @db.Uuid
-  password String @db.VarChar(255)
-
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id String @unique @db.Uuid
-
-  @@map("passwords")
-}
-
-model ChatBot {
-  id          String @id @default(uuid()) @db.Uuid
-  category    String @db.VarChar(255)
-  chat        String
-  ai_response String
-
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id String @db.Uuid
-
-  @@map("chatbots")
-}
-
-model LawyerApplication {
-  id         String   @id @default(uuid()) @db.Uuid
-  file_url   String   @db.VarChar(500)
-  lsk_number String   @db.VarChar(255)
-  created_at DateTime @default(now())
-
-  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id       String         @unique @db.Uuid
-  lawyerProfile LawyerProfile?
-
-  @@map("lawyer_applications")
-}
-
-model LawyerProfile {
-  id                    String   @id @default(uuid()) @db.Uuid
-  category              String   @db.VarChar(255)
-  phone_number          String   @db.VarChar(20)
-  description           String   @db.VarChar(1000)
-  created_at            DateTime @default(now())
-  experience            Int
-  consultation_fee      Int
-  is_active             Boolean  @default(false)
-
-  lawyerApplication     LawyerApplication @relation(fields: [lawyer_application_id], references: [id], onDelete: Cascade)
-  lawyer_application_id String            @unique @db.Uuid
-
-  @@map("lawyer_profiles")
-}
-
-model Booking {
-  id             String         @id @default(uuid()) @db.Uuid
-  date           DateTime
-  payment_status payment_status @default(PENDING)
-  notes          String?        @db.VarChar(1000)
-  booking_status booking_status @default(PENDING)
-
-  user      User       @relation("UserBookings", fields: [user_id], references: [id], onDelete: Cascade)
-  user_id   String     @db.Uuid
-  lawyer    User       @relation("LawyerBookings", fields: [lawyer_id], references: [id], onDelete: Cascade)
-  lawyer_id String     @db.Uuid
-  payment   Payment?
-  documents Document[]
-
-  @@map("bookings")
-}
-
-model Payment {
-  id                  String                     @id @default(uuid()) @db.Uuid
-  checkout_request_id String                     @db.VarChar(255)
-  number              String                     @db.VarChar(20)
-  amount              Decimal                    @db.Decimal(10, 2)
-  mpesa_receipts      String?                    @db.VarChar(255)
-  status              payment_transaction_status @default(PENDING)
-  created_at          DateTime                   @default(now())
-
-  booking    Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
-  booking_id String  @db.Uuid
-
-
-  @@map("payments")
-}
-
-model Document {
-  id          String   @id @default(uuid()) @db.Uuid
-  file_url    String   @db.VarChar(500)
-  uploaded_at DateTime @default(now())
-
-  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id    String  @db.Uuid
-  booking    Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
-  booking_id String  @db.Uuid
-
-  @@map("documents")
 }
