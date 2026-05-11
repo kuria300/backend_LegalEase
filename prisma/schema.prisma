@@ -16,32 +16,153 @@ datasource db {
 }
 
 enum Role {
-  user
-  lawyer
-  admin
+  CLIENT
+  LAWYER
+  ADMIN
 }
 
-model User {
-  id          String    @id @default(uuid())
-  first_name  String
-  second_name String
-  email       String    @unique
-  role        Role      @default(user)
-  dob         DateTime?
-  created_at  DateTime  @default(now())
-  deleted_at  DateTime?
+enum booking_status {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
 
-  password    Password?
+enum payment_status {
+  PENDING
+  PAID
+  FAILED
+}
+
+enum payment_transaction_status {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+// ─────────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  first_name     String
+  second_name    String
+  email          String    @unique @db.VarChar(255)
+  role           Role      @default(CLIENT)
+  dob            DateTime
+  created_at     DateTime  @default(now())
+  deleted_at     DateTime?
+  otp_hash       String?   @db.VarChar(255)
+  otp_expires_at DateTime? @db.Date
+
+  // Relations
+  password          Password?
+  chatbots          ChatBot[]
+  bookings          Booking[]          @relation("UserBookings")
+  lawyerBookings    Booking[]          @relation("LawyerBookings")
+  lawyerApplication LawyerApplication?
+  documents         Document[]
 
   @@map("users")
 }
 
 model Password {
-  id       String @id @default(uuid())
-  user_id  String @unique
-  password String
+  id       String @id @default(uuid()) @db.Uuid
+  password String @db.VarChar(255)
 
-  user     User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @unique @db.Uuid
 
   @@map("passwords")
+}
+
+model ChatBot {
+  id          String @id @default(uuid()) @db.Uuid
+  category    String @db.VarChar(255)
+  chat        String
+  ai_response String
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @db.Uuid
+
+  @@map("chatbots")
+}
+
+model LawyerApplication {
+  id         String   @id @default(uuid()) @db.Uuid
+  file_url   String   @db.VarChar(500)
+  lsk_number String   @db.VarChar(255)
+  created_at DateTime @default(now())
+
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id       String         @unique @db.Uuid
+  lawyerProfile LawyerProfile?
+
+  @@map("lawyer_applications")
+}
+
+model LawyerProfile {
+  id                    String   @id @default(uuid()) @db.Uuid
+  category              String   @db.VarChar(255)
+  phone_number          String   @db.VarChar(20)
+  description           String   @db.VarChar(1000)
+  created_at            DateTime @default(now())
+  experience            Int
+  consultation_fee      Int
+  is_active             Boolean  @default(false)
+
+  lawyerApplication     LawyerApplication @relation(fields: [lawyer_application_id], references: [id], onDelete: Cascade)
+  lawyer_application_id String            @unique @db.Uuid
+
+  @@map("lawyer_profiles")
+}
+
+model Booking {
+  id             String         @id @default(uuid()) @db.Uuid
+  date           DateTime
+  payment_status payment_status @default(PENDING)
+  notes          String?        @db.VarChar(1000)
+  booking_status booking_status @default(PENDING)
+
+  user      User       @relation("UserBookings", fields: [user_id], references: [id], onDelete: Cascade)
+  user_id   String     @db.Uuid
+  lawyer    User       @relation("LawyerBookings", fields: [lawyer_id], references: [id], onDelete: Cascade)
+  lawyer_id String     @db.Uuid
+  payment   Payment?
+  documents Document[]
+
+  @@map("bookings")
+}
+
+model Payment {
+  id                  String                     @id @default(uuid()) @db.Uuid
+  checkout_request_id String                     @db.VarChar(255)
+  number              String                     @db.VarChar(20)
+  amount              Decimal                    @db.Decimal(10, 2)
+  mpesa_receipts      String?                    @db.VarChar(255)
+  status              payment_transaction_status @default(PENDING)
+  created_at          DateTime                   @default(now())
+
+  booking    Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  booking_id String  @db.Uuid
+
+  // NOTE: Two partial unique indexes are enforced via a custom SQL migration
+  // (Prisma schema syntax does not support partial/conditional indexes).
+  // See: prisma/migrations/XXXXXX_add_partial_payment_indexes/migration.sql
+
+  @@map("payments")
+}
+
+model Document {
+  id          String   @id @default(uuid()) @db.Uuid
+  file_url    String   @db.VarChar(500)
+  uploaded_at DateTime @default(now())
+
+  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    String  @db.Uuid
+  booking    Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  booking_id String  @db.Uuid
+
+  @@map("documents")
 }
