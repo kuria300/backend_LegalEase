@@ -40,9 +40,7 @@ enum payment_transaction_status {
   FAILED
 }
 
-// ─────────────────────────────────────────────
 // Models
-// ─────────────────────────────────────────────
 
 model User {
   id             String    @id @default(uuid()) @db.Uuid
@@ -147,9 +145,6 @@ model Payment {
   booking    Booking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
   booking_id String  @db.Uuid
 
-  // NOTE: Two partial unique indexes are enforced via a custom SQL migration
-  // (Prisma schema syntax does not support partial/conditional indexes).
-  // See: prisma/migrations/XXXXXX_add_partial_payment_indexes/migration.sql
 
   @@map("payments")
 }
