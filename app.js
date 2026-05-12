@@ -1,5 +1,4 @@
 const express = require('express')
-
 const cluster = require('node:cluster')
 const os = require('os')
 const process = require('node:process')
@@ -13,7 +12,6 @@ process.env.TZ= TZ
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
-
 
 if(cluster.isPrimary){
   const totalCPUs = os.cpus().length;
@@ -39,6 +37,9 @@ if(cluster.isPrimary){
 }else{
 
     const app= express()
+    app.use(express.json());
+    app.use(express.urlencoded({extended: true}))
+
 
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
