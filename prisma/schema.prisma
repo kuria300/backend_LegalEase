@@ -1,15 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "./src/generated/prisma"
+  provider               = "prisma-client-js"
+  previewFeatures        = ["partialIndexes"]
   generatedFileExtension = "js"
   moduleFormat           = "cjs"
 }
-  
 
 datasource db {
   provider = "postgresql"
@@ -87,7 +81,7 @@ model passwords {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model payments {
   id                  String                     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  checkout_request_id String                     @db.VarChar(255)
+  checkout_request_id String                     @unique @db.VarChar(255)
   number              String                     @db.VarChar(20)
   amount              Decimal                    @db.Decimal(10, 2)
   mpesa_receipts      String?                    @db.VarChar(255)

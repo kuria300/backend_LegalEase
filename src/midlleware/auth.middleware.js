@@ -8,7 +8,7 @@ const ErrorResponse = require("../utils/ErrorObj");
 const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization
     if (!authHeader?.startsWith('Bearer')) {
-        return next(new ErrorResponse('No token provided', 401)
+        return next(new ErrorResponse('No token provided', 401))
     }
     const token = authHeader.split(' ')[1]
     try {

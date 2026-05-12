@@ -6,6 +6,7 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/midlleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+const adminRoute = require('./src/routes/adminRoutes')
 
 process.env.TZ= TZ
 
@@ -40,8 +41,9 @@ if(cluster.isPrimary){
 
     const app= express()
     app.use(express.json());
-
     app.use(express.urlencoded({extended: true}))
+
+    app.use('/api/admin',adminRoute);
 
     app.use(errorHandler)
 
