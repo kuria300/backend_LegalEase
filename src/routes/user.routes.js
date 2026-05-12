@@ -5,9 +5,9 @@ const userController = require('../controllers/user.controller')
 const router = Router();
 
 //All user routes are protected
-router.get("/me", authenticate, userController.getMe);
-router.put("/me", authenticate, userController.updateMe);
-router.delete("/me", authenticate, userController.deleteMe);
+router.get("/getProfile", authenticate, userController.getMe);
+router.put("/updateProfile", authenticate, userController.updateMe);
+router.delete("/deleteProfile", authenticate, userController.deleteMe);
 
 //Admin routes
 router.get("/", authenticate, authorise("ADMIN"), userController.getAllUsers);

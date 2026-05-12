@@ -1,12 +1,12 @@
-const { prisma} = require('../config/db')
+const { db } = require("../config/db")
 //Find user by email address
 const findByEmail = (email) => {
-    return prisma.user.findUnique({where: {email}});
+    return db.user.findUnique({where: {email}});
 };
 
 //find user by uuid
 const findById = ( id ) => {
-    return prisma.user.findUnique({
+    return db.user.findUnique({
         where: { id },
         select: {
             id: true,
@@ -22,7 +22,7 @@ const findById = ( id ) => {
 
 //find all users
 const findAllUsers = () => {
-    return prisma.user.findMany({
+    return db.user.findMany({
         where: {deleted_at: null},
         select:{
             id : true,
@@ -37,12 +37,12 @@ const findAllUsers = () => {
 
 //Create a new record
 const createUser = ( data ) =>{
-    return prisma.user.create({ data });
+    return db.user.create({ data });
 };
 
 //Update a user's basic profile fields
 const updateUser = ( id, data ) => {
-    return prisma.user.update({
+    return db.user.update({
         where: { id },
         data,
         select: { 
@@ -58,7 +58,7 @@ const updateUser = ( id, data ) => {
 
 //Save a hashed OTP and its expiry timestamp
 const saveOtp = ( id, otpHash, otpExpiry) => {
-    return prisma.user.update({
+    return db.user.update({
         where:{id},
         data: {otp_hash: otpHash, otp_expires_at:otpExpiry},
     });
@@ -66,7 +66,7 @@ const saveOtp = ( id, otpHash, otpExpiry) => {
 
 //Clears otp after successful deletion
 const clearOtp = (id) => {
-    return prisma.user.update({
+    return db.user.update({
         where: {id},
         data: {otp_hash:null, otp_expires_at: null},
     });
@@ -76,7 +76,7 @@ const clearOtp = (id) => {
 //Soft deleting a user by stamping deleted_at
 //doesnt remove the row from the database
 const softDeleteUser = (id) => {
-    return prisma.user.update({
+    return db.user.update({
         where: {id},
         data: { deleted_at: new Date() },
     });
