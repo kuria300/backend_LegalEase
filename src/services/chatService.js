@@ -8,7 +8,7 @@ const ErrorResponse = require('../utils/ErrorObj.js');
 //  This service will use the legal prompts to ensure that the responses are relevant to Kenyan law and legal information.
 //  The service will also include error handling to manage any issues that arise during the API calls or response processing.
 class ChatService {
-    async sendMesssage(userMessage, conversationHistory = []) {
+    async sendMessage(userMessage, conversationHistory = []) {
         try {
             // I'll first check if the user message is valid (not empty or just whitespace). If the message is invalid, I'll throw an error with a descriptive message to inform the caller about the issue.
             if (!userMessage || userMessage.trim().length === 0) {
@@ -23,7 +23,7 @@ class ChatService {
         const completion = await openai.chat.completions.create({
             model: 'gpt-4o',
             messages: messages,
-            max_tokens: 2000, // I'll set a reasonable token limit for the response to ensure that it is concise and relevant.
+            max_tokens: 2500, // I'll set a reasonable token limit for the response to ensure that it is concise and relevant.
         });
 // After receiving the response from the OpenAI API, I'll extract the relevant information such as the reply content, the model used, and the usage statistics. This information will be structured in a way that can be easily consumed by the caller, providing both the AI's response and insights into the API usage.
         return {
