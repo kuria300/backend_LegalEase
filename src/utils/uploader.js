@@ -16,7 +16,7 @@ const ALLOWED_MIME_TYPES = [
 // Keeps uploads loosely organised without complex nesting (per MVP boundary)
 const FOLDER_MAP = {
   lawyer_application: "lawyer-applications",
-  case_document:      "case-documents",
+  case_document: "case-documents",
 };
 
 const storage = new CloudinaryStorage({
@@ -26,7 +26,7 @@ const storage = new CloudinaryStorage({
 
     return {
       folder,
-      resource_type: "auto",   // handles PDFs, images, Word docs
+      resource_type: "auto", // handles PDFs, images, Word docs
       public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`,
       allowed_formats: ["jpg", "jpeg", "png", "pdf", "doc", "docx"],
     };
@@ -41,9 +41,9 @@ const fileFilter = (req, file, cb) => {
     cb(
       new ErrorResponse(
         `Unsupported file type: ${file.mimetype}. Allowed: jpg, png, pdf, doc, docx`,
-        415
+        415,
       ),
-      false
+      false,
     );
   }
 };
