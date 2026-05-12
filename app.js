@@ -3,7 +3,7 @@ const cluster = require('node:cluster')
 const os = require('os')
 const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
-const { errorHandler }= require('./src/midlleware/errorHandler')
+const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
 
 process.env.TZ= TZ
