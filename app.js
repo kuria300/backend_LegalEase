@@ -5,6 +5,7 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/midlleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+const userRoutes = require('./src/routes/user.routes')
 
 process.env.TZ= TZ
 
@@ -40,6 +41,7 @@ if(cluster.isPrimary){
     app.use(express.json());
     app.use(express.urlencoded({extended: true}))
 
+    app.use('/',userRoutes)
 
     app.use(errorHandler)
 
