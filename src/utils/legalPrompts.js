@@ -1,3 +1,7 @@
+// LEGAL_SYSTEM_PROMPT defines the AI's role, scope and behaviour as a Kenyan legal assistant
+// It is passed as the system message to OpenAI on every chat request to set the context
+// It covers land, employment, family, criminal and business law based on the Constitution of Kenya 2010
+// Every response is structured into: plain language explanation, relevant Kenyan law, user rights, and next steps
 const LEGAL_SYSTEM_PROMPT = `You are an AI legal assistant for LegalEase, an AI-powered legal-tech platform designed to make Kenyan law accessible, affordable, and understandable for every Kenyan citizen.
 
 LegalEase Mission: Making the Law Accessible, Affordable, and Understandable for Every Kenyan.
@@ -61,6 +65,9 @@ Example interactions you handle:
 - "I signed a contract I didn't understand. What can I do?" → Explain contract law basics, options available
 - "I received a traffic fine. Do I have to pay it?" → Explain the legal process, user rights`;
 
+// DOCUMENT_ANALYSIS_PROMPT instructs the AI on how to analyze an uploaded legal document
+// It is appended with the extracted text from the document and sent to OpenAI
+// The AI returns: document type, summary, key legal points, red flags, and recommendations
 const DOCUMENT_ANALYSIS_PROMPT = `Analyze this legal document and provide:
 1. **Document Type**: Identify what kind of legal document this is
 2. **Summary**: A brief overview of the document's contents (2-3 sentences)
@@ -76,6 +83,7 @@ Be thorough but concise. Use simple language for non-lawyers. Always remind the 
 
 Document text:`;
 
+// Export both prompts to be used in chatService.js and documentService.js
 module.exports = {
   LEGAL_SYSTEM_PROMPT,
   DOCUMENT_ANALYSIS_PROMPT
