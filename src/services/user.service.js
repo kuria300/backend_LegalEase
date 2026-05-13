@@ -1,4 +1,5 @@
-const userRepo = require('../repositories/user.repository')
+const userRepo = require('../repositories/user.repository');
+const ErrorResponse = require('../utils/ErrorObj');
 
 //Get all users- Admin only
 const getAllUsers = async () => {
@@ -10,9 +11,7 @@ const getAllUsers = async () => {
 const getUserById = async (userId) => {
     const user = await userRepo.findById(userId);
     if (!user) {
-        const error = new Error("User not found.");
-        error.statusCode = 404;
-        throw error;
+        throw new ErrorResponse("User not found", 404, "USER_NOT_FOUND")
     }
     return user;
 }
@@ -22,11 +21,9 @@ const getUserById = async (userId) => {
 const getProfile = async ( userId ) => {
     const user = await userRepo.findById(userId);
     if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
-    }
-    return user;
+        throw new ErrorResponse("User not found", 404, "USER_NOT_FOUND");
+}
+    return user
 };
 
 //update the logged-in user profile
@@ -42,15 +39,13 @@ const updateProfile = async (userId, data) => {
     }
 
     if (Object.keys(updateData).length === 0){
-        const error = new Error( "No valid fields provided to update.");
-        error.statusCode = 400;
-        throw error;
+        throw new ErrorResponse("No valid fields provided to update", 400,"NO_VALID_FIELDS")
     }
     return userRepo.updateUser(userId, updateData);
 };
 
 const deleteUser = async (userId) => {
-    await userRepo.softDeleteUser(userId);
+    await userRepo.HardDeleteUser(userId);
     return {message: "Account deleted successfully."}
 }
 
