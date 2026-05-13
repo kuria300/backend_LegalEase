@@ -37,6 +37,18 @@ const createBooking = async (data) => {
 };
 // User booking routes
 
+const findBookingWithLawyerProfile = async(bookingId) => {
+    return db.bookings.findUnique({
+        where: {
+            id: bookingId
+        },
+        include: {
+            lawyer_profile: true
+        }
+    });
+};
+
+module.exports = { createBooking , findBookingWithLawyerProfile};
 // Fetch all bookings belonging to a specific user
 const getUserBookings = async (user_id, page, limit) => {
     try {
