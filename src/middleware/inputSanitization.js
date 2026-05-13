@@ -1,6 +1,6 @@
 //In this file I am working on input sanitization for the user registration and login forms. I will use the express-validator library to validate and sanitize the input data.
 
-const validator = require('express-validator');
+const validator = require('validator');
 
 const ErrorResponse = require('../utils/ErrorObj.js');
 
