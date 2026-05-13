@@ -12,6 +12,7 @@ const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
+const lawyerProfile = require('./src/routes/lawyerProfileRoutes')
 const getCallBack= require('./src/routes/callbackRoute')
 const getCheckout = require('./src/routes/checkoutRoute')
 
@@ -59,10 +60,9 @@ if(cluster.isPrimary){
     app.use('/api/chat', chatRoutes)
     app.use('/', userRoutes)
     app.use('/api/admin',adminRoutes);
-
-    app.use('/api/chat', chatRoutes)
-    app.use('/',userRoutes)
     app.use("/api/bookings", bookingRoutes);
+    app.use("/api/lawyerProfile", lawyerProfile)
+    // ── Error handler (must be last) ──────────────────────────
 
     // mpeesa Routes
     app.use('/payments/callback', getCallBack)
