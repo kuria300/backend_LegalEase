@@ -1,4 +1,4 @@
-const { createBooking } = require("../repositories/booking.repository");
+const { createBooking, getUserBookings } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
 const { db } = require("../config/db")
 
@@ -53,5 +53,31 @@ const createBookingService = async (data) => {
     throw err;
   }
 };
+// user booking routes
 
-module.exports = { createBookingService };
+const getUserBookingsService = async (user_id, page, limit) => {
+  try {
+    // confirm whether user is present before querying the database
+    if (!user_id) {
+      throw new ErrorResponse("Authentication is required", 400);
+    }
+    // set default page to 1 if page is not provided
+    const currentPage = parseInt(page) || 1;
+
+    // set default to 10 bookings if not provided
+    const pageLimit = parseInt(limit) || 10;
+
+    // Validate page number is a positive int
+    if(currentPage < 1){
+      throw new ErrorResponse("Page must be greater than 0", 400);
+    }
+    // fetch user paginated bookings from the repository
+    const result = await getUserBookings(user_id, currentPage, pageLimit);
+
+    return result;
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports = { createBookingService, getUserBookingsService };
