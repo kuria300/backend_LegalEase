@@ -1,4 +1,4 @@
-const { createBookingService } = require("../services/booking.service");
+const { createBookingService, getUserBookingsService } = require("../services/booking.service");
 const ErrorResponse = require("../utils/ErrorObj");
 
 const createBooking = async (req, res, next) => {
@@ -24,5 +24,34 @@ const createBooking = async (req, res, next) => {
     next(err);
   }
 };
+// User booking routes
 
-module.exports = { createBooking };
+const getUserBookings = async (req, res, next) => {
+  try {
+    // Get logged in user ID from JWT token
+    const user_id = req.user.id;
+
+    // Extract pagination params from query string -> eg. ?page=1&limit=10
+    const { page, limit } = req.query;
+
+    // call service to fetch paginated bookings for this user
+    const result = await getUserBookingsService(user_id, page, limit);
+
+    return res.status(200).json({
+      success: true,
+      message: "User bookings retrieved successfully",
+      totalBookings: result.totalBookings,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      count: result.bookings.length,
+      data: result.bookings
+    });
+
+  } catch (err) {
+    next(err);
+    
+  }
+};
+
+
+module.exports = { createBooking, getUserBookings };

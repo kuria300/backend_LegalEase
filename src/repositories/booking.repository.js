@@ -35,5 +35,57 @@ const createBooking = async (data) => {
         throw err;
     }
 };
+// User booking routes
 
-module.exports = { createBooking };
+// Fetch all bookings belonging to a specific user
+const getUserBookings = async (user_id, page, limit) => {
+    try {
+        // determine how many records to skip based on the current page
+        const skip = (page - 1) * limit;
+
+        // Get total count of user bookings for pagination metadata
+        const totalBookings = await db.bookings.count({
+            where: {
+                user_id: user_id
+            }
+        });
+
+        // filter the bookings by the authenticated user's ID
+        const bookings = await db.bookings.findMany({
+            where: {
+                user_id: user_id
+            },
+            // include lawyer profile details in the response
+            include: {
+                users_bookings_lawyer_idTousers: {
+                    select: {
+                        first_name: true,
+                        second_name: true,
+                        email: true
+                    }
+                },
+                // include payment details if they exist
+                payments: true
+            },
+            // show most recent bookings first
+            orderBy: {
+                date: "desc"
+            },
+            skip: skip,
+            // limit records to the page size
+            take: limit
+        });
+        // If user doesn't have any bookings, return an empty array
+        if (!bookings.length){
+            return {bookings: [], totalBookings: 0, totalPages: 0, currentPage: page};
+        }
+        // calculate the total no. of pages
+        const totalPages = Math.ceil(totalBookings / limit);
+
+        return { bookings, totalBookings, totalPages, currentPage: page};
+    } catch (err) {
+        throw err;
+    }
+};
+
+module.exports = { createBooking, getUserBookings };
