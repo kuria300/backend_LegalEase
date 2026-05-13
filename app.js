@@ -6,6 +6,7 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+const dashboardRoutes = require('./src/routes/dashboardRoutes')
 const lawyerDashboardRoutes = require('./src/routes/lawyerDashboardRoutes')
 const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
@@ -46,6 +47,9 @@ if(cluster.isPrimary){
     }))
 
     // ── Routes ────────────────────────────────────────────────
+    app.use('/api/dashboard', dashboardRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/', userRoutes)
     app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/', userRoutes)
