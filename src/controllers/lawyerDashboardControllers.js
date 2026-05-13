@@ -1,5 +1,9 @@
-const { db: prisma } = require("../config/db");
 const ErrorResponse = require("../utils/ErrorObj");
+const {
+  getUpcomingBookings,
+  getRecentCompletedBookings,
+  getLawyerProfile,
+} = require("../repositories/lawyerDashboardRepository");
 
 // GET /api/lawyer-dashboard/summary
 const getLawyerSummary = async (req, res, next) => {
@@ -10,39 +14,10 @@ const getLawyerSummary = async (req, res, next) => {
       return next(new ErrorResponse("lawyer_id is required", 400));
     }
 
-    // Run all queries in parallel
     const [upcomingBookings, recentCompletedBookings, lawyerProfile] = await Promise.all([
-
-      // 3 upcoming bookings
-      prisma.bookings.findMany({
-        where: {
-          lawyer_id,
-          booking_status: { in: ["PENDING", "CONFIRMED"] },
-          date: { gte: new Date() },
-        },
-        orderBy: { date: "asc" },
-        take: 3,
-      }),
-
-      // 3 most recent completed bookings
-      prisma.bookings.findMany({
-        where: {
-          lawyer_id,
-          booking_status: "COMPLETED",
-        },
-        orderBy: { date: "desc" },
-        take: 3,
-      }),
-
-      // Lawyer profile
-      prisma.lawyer_profiles.findFirst({
-        where: {
-          lawyer_applications: {
-            user_id: lawyer_id,
-          },
-        },
-      }),
-
+      getUpcomingBookings(lawyer_id),
+      getRecentCompletedBookings(lawyer_id),
+      getLawyerProfile(lawyer_id),
     ]);
 
     res.status(200).json({
