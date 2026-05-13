@@ -7,12 +7,9 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
-<<<<<<< HEAD
-const adminRoute = require('./src/routes/adminRoutes')
-=======
+const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
->>>>>>> development
 
 process.env.TZ= TZ
 
@@ -59,15 +56,12 @@ if(cluster.isPrimary){
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
 
-<<<<<<< HEAD
-    app.use('/api/admin',adminRoute);
+    app.use('/api/admin',adminRoutes);
 
-=======
     app.use('/api/chat', chatRoutes)
     app.use('/',userRoutes)
 
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
->>>>>>> development
     app.use(errorHandler)
 
     app.listen(PORT, ()=>{
