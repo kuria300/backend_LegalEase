@@ -6,12 +6,15 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+const dashboardRoutes = require('./src/routes/dashboardRoutes')
 const lawyerDashboardRoutes = require('./src/routes/lawyerDashboardRoutes')
 const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
 const lawyerProfile = require('./src/routes/lawyerProfileRoutes')
+const getCallBack= require('./src/routes/callbackRoute')
+const getCheckout = require('./src/routes/checkoutRoute')
 
 process.env.TZ= TZ
 
@@ -21,7 +24,6 @@ BigInt.prototype.toJSON = function () {
 
 if(cluster.isPrimary){
   const totalCPUs = os.cpus().length;
-  
   const numCPUsToUse = Math.max(1, os.cpus().length - numLessCpus);
   
   console.log(`Total CPUs: ${totalCPUs} will run ${numCPUsToUse} workers.`);
@@ -47,6 +49,13 @@ if(cluster.isPrimary){
     }))
 
     // ── Routes ────────────────────────────────────────────────
+    const documentRoutes = require('./src/routes/documentRoutes')
+    app.use('/api/documents', documentRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/', userRoutes)
+    app.use('/api/dashboard', dashboardRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/', userRoutes)
     app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/', userRoutes)
@@ -54,6 +63,11 @@ if(cluster.isPrimary){
     app.use("/api/bookings", bookingRoutes);
     app.use("/api/lawyerProfile", lawyerProfile)
     // ── Error handler (must be last) ──────────────────────────
+
+    // mpeesa Routes
+    app.use('/payments/callback', getCallBack)
+    app.use('/checkout', getCheckout)
+
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
 
