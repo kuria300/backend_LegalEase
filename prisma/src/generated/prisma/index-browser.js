@@ -120,7 +120,70 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.UserScalarFieldEnum = {
+exports.Prisma.BookingsScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  payment_status: 'payment_status',
+  notes: 'notes',
+  booking_status: 'booking_status',
+  user_id: 'user_id',
+  lawyer_id: 'lawyer_id'
+};
+
+exports.Prisma.ChatbotsScalarFieldEnum = {
+  id: 'id',
+  category: 'category',
+  chat: 'chat',
+  ai_response: 'ai_response',
+  user_id: 'user_id'
+};
+
+exports.Prisma.DocumentsScalarFieldEnum = {
+  id: 'id',
+  file_url: 'file_url',
+  uploaded_at: 'uploaded_at',
+  user_id: 'user_id',
+  booking_id: 'booking_id'
+};
+
+exports.Prisma.Lawyer_applicationsScalarFieldEnum = {
+  id: 'id',
+  file_url: 'file_url',
+  lsk_number: 'lsk_number',
+  created_at: 'created_at',
+  user_id: 'user_id'
+};
+
+exports.Prisma.Lawyer_profilesScalarFieldEnum = {
+  id: 'id',
+  category: 'category',
+  phone_number: 'phone_number',
+  description: 'description',
+  created_at: 'created_at',
+  experience: 'experience',
+  consultation_fee: 'consultation_fee',
+  is_active: 'is_active',
+  lawyer_application_id: 'lawyer_application_id'
+};
+
+exports.Prisma.PasswordsScalarFieldEnum = {
+  id: 'id',
+  password: 'password',
+  user_id: 'user_id'
+};
+
+exports.Prisma.PaymentsScalarFieldEnum = {
+  id: 'id',
+  booking_id: 'booking_id',
+  checkout_req_id: 'checkout_req_id',
+  number: 'number',
+  amount: 'amount',
+  mpesa_receipt: 'mpesa_receipt',
+  status: 'status',
+  created_at: 'created_at'
+};
+
+exports.Prisma.UsersScalarFieldEnum = {
   id: 'id',
   first_name: 'first_name',
   second_name: 'second_name',
@@ -128,33 +191,25 @@ exports.Prisma.UserScalarFieldEnum = {
   role: 'role',
   dob: 'dob',
   created_at: 'created_at',
-  deleted_at: 'deleted_at'
+  deleted_at: 'deleted_at',
+  otp_hash: 'otp_hash',
+  otp_expires_at: 'otp_expires_at'
 };
 
-exports.Prisma.LawyerApplicationScalarFieldEnum = {
+exports.Prisma.Pending_callbacksScalarFieldEnum = {
   id: 'id',
-  user_id: 'user_id',
-  file_url: 'file_url',
-  lsk_number: 'lsk_number',
-  created_at: 'created_at',
-  status: 'status'
-};
-
-exports.Prisma.LawyerProfileScalarFieldEnum = {
-  id: 'id',
-  lawyer_application_id: 'lawyer_application_id',
-  category: 'category',
-  phone_number: 'phone_number',
-  description: 'description',
-  created_at: 'created_at',
-  experience: 'experience',
-  consultation_fee: 'consultation_fee',
-  is_active: 'is_active'
+  checkout_req_id: 'checkout_req_id',
+  payload: 'payload',
+  created_at: 'created_at'
 };
 
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -166,16 +221,47 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
-exports.UserRole = exports.$Enums.UserRole = {
-  USER: 'USER',
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
+exports.payment_status = exports.$Enums.payment_status = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  FAILED: 'FAILED'
+};
+
+exports.booking_status = exports.$Enums.booking_status = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED',
+  COMPLETED: 'COMPLETED'
+};
+
+exports.payment_transaction_status = exports.$Enums.payment_transaction_status = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED'
+};
+
+exports.Role = exports.$Enums.Role = {
+  CLIENT: 'CLIENT',
   LAWYER: 'LAWYER',
   ADMIN: 'ADMIN'
 };
 
 exports.Prisma.ModelName = {
-  User: 'User',
-  LawyerApplication: 'LawyerApplication',
-  LawyerProfile: 'LawyerProfile'
+  bookings: 'bookings',
+  chatbots: 'chatbots',
+  documents: 'documents',
+  lawyer_applications: 'lawyer_applications',
+  lawyer_profiles: 'lawyer_profiles',
+  passwords: 'passwords',
+  payments: 'payments',
+  users: 'users',
+  pending_callbacks: 'pending_callbacks'
 };
 
 /**
