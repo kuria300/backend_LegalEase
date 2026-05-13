@@ -1,11 +1,13 @@
-const { db } = require("../config/db");
 const cloudinary = require("../config/cloudinary");
 const ErrorResponse = require("../utils/ErrorObj");
-
+const {
+  createDocument,
+  findDocumentById,
+  findDocuments,
+  deleteDocument,
+} = require("../repositories/documentRepository");
 
 // Extracts Cloudinary public_id from a secure URL
-// "https://res.cloudinary.com/xxx/image/upload/v123/case-documents/abc.pdf"
-// → "case-documents/abc"
 const extractPublicId = (fileUrl) => {
   const match = fileUrl.match(/\/upload\/v\d+\/(.+)\.[^.]+$/);
   return match ? match[1] : null;
@@ -24,12 +26,10 @@ const uploadDocument = async (req, res, next) => {
       return next(new ErrorResponse("user_id and booking_id are required", 400));
     }
 
-    const document = await prisma.documents.create({
-      data: {
-        file_url: req.file.path,
-        user_id,
-        booking_id,
-      },
+    const document = await createDocument({
+      file_url: req.file.path,
+      user_id,
+      booking_id,
     });
 
     res.status(201).json({ success: true, data: document });
@@ -44,9 +44,7 @@ const uploadDocument = async (req, res, next) => {
 // GET /api/documents/:id
 const getDocumentById = async (req, res, next) => {
   try {
-    const document = await prisma.documents.findUnique({
-      where: { id: req.params.id },
-    });
+    const document = await findDocumentById(req.params.id);
 
     if (!document) {
       return next(new ErrorResponse("Document not found", 404));
@@ -73,10 +71,7 @@ const getDocuments = async (req, res, next) => {
     if (user_id) where.user_id = user_id;
     if (booking_id) where.booking_id = booking_id;
 
-    const documents = await prisma.documents.findMany({
-      where,
-      orderBy: { uploaded_at: "desc" },
-    });
+    const documents = await findDocuments(where);
 
     res.status(200).json({ success: true, count: documents.length, data: documents });
   } catch (error) {
@@ -85,11 +80,9 @@ const getDocuments = async (req, res, next) => {
 };
 
 // DELETE /api/documents/:id
-const deleteDocument = async (req, res, next) => {
+const deleteDocumentHandler = async (req, res, next) => {
   try {
-    const document = await prisma.documents.findUnique({
-      where: { id: req.params.id },
-    });
+    const document = await findDocumentById(req.params.id);
 
     if (!document) {
       return next(new ErrorResponse("Document not found", 404));
@@ -101,7 +94,7 @@ const deleteDocument = async (req, res, next) => {
       await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
     }
 
-    await prisma.documents.delete({ where: { id: req.params.id } });
+    await deleteDocument(req.params.id);
 
     res.status(200).json({ success: true, message: "Document deleted" });
   } catch (error) {
@@ -109,4 +102,4 @@ const deleteDocument = async (req, res, next) => {
   }
 };
 
-module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument };
+module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument: deleteDocumentHandler };
