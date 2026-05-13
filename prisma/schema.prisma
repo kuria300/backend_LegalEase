@@ -5,7 +5,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["partialIndexes"]
+  previewFeatures = ["driverAdapters"]
   generatedFileExtension = "js"
   moduleFormat           = "cjs"
 }

@@ -29,7 +29,7 @@ const getUserById = async (req, res) => {
 //Deletes user
 const deleteMe = async (req, res) => {
   try {
-    const result = await userService.deleteAccount(req.user.userId);
+    const result = await userService.deleteUser(req.user.userId);
     return res.status(200).json({ success: true, ...result });
   } catch (error) {
     return res.status(error.statusCode || 500).json({

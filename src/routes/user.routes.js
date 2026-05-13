@@ -10,7 +10,7 @@ router.put("/update", authenticate, userController.updateMe);
 router.delete("/delete", authenticate, userController.deleteMe);
 
 //Admin routes
-router.get("/", authenticate, authorise("ADMIN"), userController.getAllUsers);
+router.get("/getAll", authenticate, authorise("ADMIN"), userController.getAllUsers);
 router.get("/:id", authenticate, authorise("ADMIN"), userController.getUserById);
 
 module.exports = router;

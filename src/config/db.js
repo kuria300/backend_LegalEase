@@ -16,5 +16,5 @@ const prisma= new PrismaClient({adapter})
 
 
 module.exports={
-    db: prisma
+    prisma
 }
