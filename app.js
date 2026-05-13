@@ -14,6 +14,7 @@ const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
 const getCallBack= require('./src/routes/callbackRoute')
 const getCheckout = require('./src/routes/checkoutRoute')
+const getStatus = require('./src/routes/payStatus')
 
 process.env.TZ= TZ
 
@@ -47,19 +48,12 @@ if(cluster.isPrimary){
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
 
-    // ── Routes ────────────────────────────────────────────────
+    // routes
     const documentRoutes = require('./src/routes/documentRoutes')
     app.use('/api/documents', documentRoutes)
-    app.use('/api/chat', chatRoutes)
-    app.use('/', userRoutes)
     app.use('/api/dashboard', dashboardRoutes)
-    app.use('/api/chat', chatRoutes)
-    app.use('/', userRoutes)
     app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
-    app.use('/api/chat', chatRoutes)
-    app.use('/', userRoutes)
     app.use('/api/admin',adminRoutes);
-
     app.use('/api/chat', chatRoutes)
     app.use('/',userRoutes)
     app.use("/api/bookings", bookingRoutes);
@@ -67,6 +61,7 @@ if(cluster.isPrimary){
     // mpeesa Routes
     app.use('/payments/callback', getCallBack)
     app.use('/checkout', getCheckout)
+    app.use('/check-status', getStatus)
 
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
