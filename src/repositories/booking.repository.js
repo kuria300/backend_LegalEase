@@ -48,7 +48,6 @@ const findBookingWithLawyerProfile = async(bookingId) => {
     });
 };
 
-module.exports = { createBooking , findBookingWithLawyerProfile};
 // Fetch all bookings belonging to a specific user
 const getUserBookings = async (user_id, page, limit) => {
     try {
@@ -256,5 +255,6 @@ module.exports = {
     getBookingById,
     updateBookingStatus,
     deleteBooking,
-    updatePaymentBookingStatus
+    updatePaymentBookingStatus,
+    findBookingWithLawyerProfile
 };
