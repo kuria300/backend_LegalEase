@@ -11,6 +11,7 @@ const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
+const lawyerMarketplaceRoutes = require("./src/routes/lawyerMarketplace.routes");
 
 process.env.TZ= TZ
 
@@ -50,10 +51,8 @@ if(cluster.isPrimary){
     app.use('/api/chat', chatRoutes)
     app.use('/', userRoutes)
     app.use('/api/admin',adminRoutes);
-
-    app.use('/api/chat', chatRoutes)
-    app.use('/',userRoutes)
     app.use("/api/bookings", bookingRoutes);
+    app.use ("/api/lawyers", lawyerMarketplaceRoutes);
 
     // ── Error handler (must be last) ──────────────────────────
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
