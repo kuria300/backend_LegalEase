@@ -1,17 +1,12 @@
 const { createBookingService } = require("../services/booking.service");
-const { ErrorResponse } = require("../utils/ErrorObj");
+const ErrorResponse = require("../utils/ErrorObj");
 
-const createBooking = async (req, resizeBy, next) => {
+const createBooking = async (req, res, next) => {
   try {
     // Extract booking details from request body
     const { lawyer_id, date, notes } = req.body;
     // extract authenticated user_id from JWT token
     const user_id = req.user.id;
-
-    // validate lawyer_id and date -> required fields
-    if (!lawyer_id || !date) {
-      throw new ErrorResponse("Lawyer ID and date are required", 400);
-    }
     // Call the service layer with all required booking data
     const booking = await createBookingService({
       user_id,

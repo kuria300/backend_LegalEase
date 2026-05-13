@@ -1,5 +1,6 @@
 const { createBooking } = require("../repositories/booking.repository");
-const { ErrorResponse } = require("../utils/ErrorObj");
+const ErrorResponse = require("../utils/ErrorObj");
+const { db } = require("../config/db")
 
 const createBookingService = async (data) => {
   try {
@@ -25,6 +26,20 @@ const createBookingService = async (data) => {
         `Booking date cannot be in the past. Please select a date from ${now} onwards`,
         400,
       );
+    }
+    // Verify the lawyer profile exists before booking
+    const lawyerExists = await db.users.findFirst({
+      where: {
+        id: lawyer_id,
+        role: "LAWYER"
+      }
+    });
+    if(!lawyerExists){
+      throw new ErrorResponse("Lawyer not found", 404);
+    }
+    // Prevent lawyer from booking themselves
+    if(user_id === lawyerExists.lawyer_application_id){
+      throw new ErrorResponse("You cannot book yourself as a lawyer", 400);
     }
     //pass validated data to the repository to create the booking
     const booking = await createBooking({

@@ -1,5 +1,5 @@
 const { db } = require("../config/db");
-const { ErrorResponse } = require("../utils/ErrorObj");
+const ErrorResponse = require("../utils/ErrorObj");
 
 const createBooking = async (data) => {
     try {
@@ -10,7 +10,7 @@ const createBooking = async (data) => {
                 lawyer_id: data.lawyer_id,
                 date: data.date,
                 booking_status: {
-                    notIn: ["cancelled"]
+                    notIn: ["CANCELLED"]
                 }
             }
         });
@@ -26,8 +26,8 @@ const createBooking = async (data) => {
                 lawyer_id: data.lawyer_id,
                 date: data.date,
                 notes: data.notes,
-                payment_status: "pending",
-                booking_status: "pending"
+                payment_status: "PENDING",
+                booking_status: "PENDING"
             }
         });
         return booking;
