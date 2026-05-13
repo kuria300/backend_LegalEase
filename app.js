@@ -8,6 +8,7 @@ const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
 const { chatRoutes, testConnection } = require('./ai')
+const userRoutes = require('./src/routes/user.routes')
 
 process.env.TZ= TZ
 
@@ -55,6 +56,7 @@ if(cluster.isPrimary){
     }))
 
     app.use('/api/chat', chatRoutes)
+    app.use('/',userRoutes)
 
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
