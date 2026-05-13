@@ -1,4 +1,4 @@
-const { createBookingService, getUserBookingsService } = require("../services/booking.service");
+const { createBookingService, getUserBookingsService, getLawyerBookingsService } = require("../services/booking.service");
 const ErrorResponse = require("../utils/ErrorObj");
 
 const createBooking = async (req, res, next) => {
@@ -53,5 +53,30 @@ const getUserBookings = async (req, res, next) => {
   }
 };
 
+const getLawyerBookings = async (req, res, next)=>{
+  try {
+    // Get lawyer id from JWT
+    const lawyer_id = req.user.id;
 
-module.exports = { createBooking, getUserBookings };
+    // exract pagination parameters from query string
+    const { page, limit } = req.query;
+    // Call service to fetch paginated bookings for the lawyer
+    const result = await getLawyerBookingsService(lawyer_id, page, limit);
+
+    // return success response with paginated bookings and metadata
+    return res.status(200).json({
+      success: true,
+      message: "Lawyer bookings retrieved successfully",
+      totalBookings: result.totalBookings,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      count: result.bookings.length,
+      data: result.bookings
+    });
+    
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { createBooking, getUserBookings, getLawyerBookings };
