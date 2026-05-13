@@ -1,6 +1,11 @@
 generator client {
+<<<<<<< HEAD
   provider               = "prisma-client-js"
   previewFeatures        = ["partialIndexes"]
+=======
+  provider =       "prisma-client-js"
+  previewFeatures = ["partialIndexes"]
+>>>>>>> development
   generatedFileExtension = "js"
   moduleFormat           = "cjs"
 }

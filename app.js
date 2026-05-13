@@ -1,12 +1,18 @@
 const express = require('express')
+const session = require('express-session')
 
 const cluster = require('node:cluster')
 const os = require('os')
 const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
-const { errorHandler }= require('./src/midlleware/errorHandler')
+const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+<<<<<<< HEAD
 const adminRoute = require('./src/routes/adminRoutes')
+=======
+const { chatRoutes, testConnection } = require('./ai')
+const userRoutes = require('./src/routes/user.routes')
+>>>>>>> development
 
 process.env.TZ= TZ
 
@@ -22,6 +28,8 @@ if(cluster.isPrimary){
   const numCPUsToUse = Math.max(1, os.cpus().length - numLessCpus);
   
   console.log(`Total CPUs: ${totalCPUs} will run ${numCPUsToUse} workers.`);
+
+  testConnection();
 
   
   for( let i=0; i< numCPUsToUse ; i++){
@@ -42,9 +50,24 @@ if(cluster.isPrimary){
     const app= express()
     app.use(express.json());
     app.use(express.urlencoded({extended: true}))
+    app.use(session({
+        // express-session is required by messageLimit.js to track how many messages a guest user has sent
+        // without it req.session is undefined and the server crashes
+        secret: process.env.SESSION_SECRET || 'legalease_secret',
+        resave: false,
+        saveUninitialized: true,
+        cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
+    }))
 
+<<<<<<< HEAD
     app.use('/api/admin',adminRoute);
 
+=======
+    app.use('/api/chat', chatRoutes)
+    app.use('/',userRoutes)
+
+    app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
+>>>>>>> development
     app.use(errorHandler)
 
     app.listen(PORT, ()=>{

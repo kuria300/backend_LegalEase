@@ -171,3 +171,7 @@ vite.config.ts.timestamp-*
 .vite/
 
 prisma/src/generated/prisma
+
+//package-lock.json
+.package-lock.json
+.package.json
