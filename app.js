@@ -1,6 +1,3 @@
-require('dotenv').config();
-
-
 const express = require('express')
 const cluster = require('node:cluster')
 const os = require('os')
