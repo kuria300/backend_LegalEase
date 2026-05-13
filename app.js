@@ -7,6 +7,7 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
@@ -55,6 +56,8 @@ if(cluster.isPrimary){
         saveUninitialized: true,
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
+
+    app.use('/api/admin',adminRoutes);
 
     app.use('/api/chat', chatRoutes)
     app.use('/',userRoutes)
