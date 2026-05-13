@@ -2,7 +2,15 @@ const { db } = require("../config/db")
 
 //Find user by email address
 const findByEmail = (email) => {
-    return prisma.users.findUnique({where: {email}});
+    return db.users.findUnique({where: {email},
+        select: {
+            id:             true,
+            email:          true,
+            role:           true,
+            otp_hash:       true,
+            otp_expires_at: true,
+        }
+    });
 };
 
 //find user by uuid
@@ -72,7 +80,6 @@ const clearOtp = (id) => {
         data: {otp_hash:null, otp_expires_at: null},
     });
 };
-
 
 //Soft deleting a user by stamping deleted_at
 //doesnt remove the row from the database

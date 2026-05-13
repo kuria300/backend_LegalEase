@@ -3,6 +3,7 @@ const cluster = require('node:cluster')
 const os = require('os')
 const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
+const cookieParser = require('cookie-parser')
 const { errorHandler }= require('./src/midlleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
 const userRoutes = require('./src/routes/user.routes')
@@ -41,6 +42,7 @@ if(cluster.isPrimary){
     const app= express()
     app.use(express.json());
     app.use(express.urlencoded({extended: true}))
+    app.use(cookieParser());
 
     app.use('/api/user',userRoutes)
     app.use('/api/auth', authRoutes)
