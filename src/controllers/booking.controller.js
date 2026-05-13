@@ -1,4 +1,11 @@
-const { createBookingService, getUserBookingsService, getLawyerBookingsService } = require("../services/booking.service");
+const { 
+  createBookingService, 
+  getUserBookingsService, 
+  getLawyerBookingsService,
+  updateBookingStatusService,
+  deleteBookingService 
+} = require("../services/booking.service");
+const { getBookingById } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
 
 const createBooking = async (req, res, next) => {
@@ -78,5 +85,82 @@ const getLawyerBookings = async (req, res, next)=>{
     next(err);
   }
 };
+// Function to get a single booking by ID
+const getUserBookingById = async (req, res, next) => {
+  try {
+    //get booking id from url parameter
+    const { id } = req.params;
 
-module.exports = { createBooking, getUserBookings, getLawyerBookings };
+    // get authenticated user id from JWT token
+    const user_id = req.user.id;
+
+    // fetch the booking from the service
+    const booking = await getBookingById(id);
+
+    if(!booking){
+      throw new ErrorResponse("Booking not found", 404);
+    }
+    
+    //ensure users can only view their own booking
+    if(booking.user_id !== user_id){
+      throw new ErrorResponse("You are not authorized to view this booking", 403);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking retrieved successfully",
+      data: booking
+    })
+  } catch (err) {
+    next(err);
+  }
+}
+const updateBookingStatus = async (req, res, next) => {
+  try {
+    // extract booking id from url param
+    const { id } = req.params;
+    // Get the new status from the req body
+    const { booking_status } = req.body;
+    // Get authenticated user Id from JWT
+    const user_id = req.user.id;
+
+    // Call service to validate & update the booking status
+    const updatedBooking = await updateBookingStatusService(id, booking_status, user_id);
+
+    // Return response with updated booking
+    return res.status(200).json({
+      success: true,
+      message: "Booking status updated successfully",
+      data: updatedBooking
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+// delete booking
+const deleteBooking = async (req, res, next)=>{
+  try {
+    const { id } = req.params;
+    //get user id from JWT token
+    const user_id = req.user.id;
+    //call service to validate and delete the booking
+    await deleteBookingService(id, user_id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking deleted successfully"
+    });
+  } catch (err) {
+    next(err)
+  }
+}
+
+
+module.exports = { 
+  createBooking, 
+  getUserBookings, 
+  getLawyerBookings,
+  getUserBookingById,
+  updateBookingStatus,
+  deleteBooking
+};
