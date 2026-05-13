@@ -2,7 +2,7 @@
 //WE WILL ACTIVATE ONCE WE HAVE SUPERBASE CREDENTIALS
 const {Pool} = require('pg')
 const { PrismaPg } = require('@prisma/adapter-pg')
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('../../prisma/src/generated/prisma')
 require('dotenv').config()
 
 
