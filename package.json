@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
     "dev": "nodemon app.js",
     "start": "node app.js"
   },
@@ -25,11 +25,26 @@
     "@prisma/client": "^7.8.0",
     "axios": "^1.16.0",
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dayjs": "^1.11.20",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "pg": "^8.20.0"
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.5.1",
+    "express-session": "^1.19.0",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "openai": "^6.37.0",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.20.0",
+    "tesseract.js": "^7.0.0",
+    "validator": "^13.15.35",
+    "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "prisma": "^7.8.0"
   }
