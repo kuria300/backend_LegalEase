@@ -58,6 +58,11 @@ if(cluster.isPrimary){
     app.use('/api/chat', chatRoutes)
     app.use('/',userRoutes)
 
+    // Health check route to verify the server is running, useful for monitoring and frontend connectivity checks
+    app.get('/api/health', (req, res) => {
+        res.json({ status: 'OK', message: 'LegalEase API running', timestamp: new Date().toISOString() });
+    })
+
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
 

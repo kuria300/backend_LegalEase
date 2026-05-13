@@ -17,7 +17,7 @@
 
 const chatService = require('../services/chatService');
 const documentService = require('../services/documentService');
-const { db: prisma } = require('../config/db.js');
+const chatRepository = require('../repositories/chat.repository');
 
 //class for chat controller
 class ChatController {
@@ -42,17 +42,9 @@ class ChatController {
                 { role: 'assistant', content: result.reply }
             ];
 
-            // If user is logged in, save the message and reply to the database
-              if (userId) {
-                // fixed: chatbots -> chatBot (matches your Prisma schema)
-                await prisma.chatBot.create({
-                    data: {
-                        user_id: userId,
-                        chat: message,
-                        ai_response: result.reply,
-                        category: 'general'
-                    }
-                });
+            // If user is logged in, save the message and reply to the database via repository
+            if (userId) {
+                await chatRepository.saveMessage(userId, message, result.reply);
             }
 
             // Build the response object with the reply, updated history and usage stats
@@ -92,15 +84,9 @@ class ChatController {
             // Send the file to documentService for analysis
             const result = await documentService.analyzeDocument(file);
 
-            // If user is logged in, save the document analysis to the database
+            // If user is logged in, save the document to the database via repository
             if (userId) {
-                await prisma.documents.create({
-                    data: {
-                        user_id: userId,
-                        booking_id: bookingId || null,
-                        file_url: result.fileName,
-                    },
-                });
+                await chatRepository.saveDocument(userId, result.fileName);
             }
 
             // Send the analysis result back to the client
@@ -120,12 +106,8 @@ class ChatController {
             // Check if userId is provided
             if (!userId) throw new ErrorResponse('User ID is required', 400);
 
-            // Fetch the most recent conversations from the database
-            const conversations = await prisma.chatConversation.findMany({
-                where: { userId },
-                orderBy: { createdAt: 'desc' },
-                take: parseInt(limit),
-            });
+            // Fetch the most recent conversations from the database via repository
+            const conversations = await chatRepository.getChatHistory(userId, limit);
 
             // Send the conversations back to the client
             res.json({ success: true, conversations, count: conversations.length });
@@ -144,13 +126,8 @@ class ChatController {
             // Check if userId is provided
             if (!userId) throw new ErrorResponse('User ID is required', 400);
 
-            // Fetch the most recent document analyses from the database
-            const documents = await prisma.documents.findMany({
-                where: { user_id: userId },
-                orderBy: { uploaded_at: 'desc' },
-                take: parseInt(limit),
-                select: { id: true, file_url: true, booking_id: true, uploaded_at: true },
-            });
+            // Fetch the most recent document uploads from the database via repository
+            const documents = await chatRepository.getDocumentHistory(userId, limit);
 
             // Send the document history back to the client
             res.json({ success: true, documents, count: documents.length });
@@ -168,8 +145,8 @@ class ChatController {
             // Check if userId is provided
             if (!userId) throw new ErrorResponse('User ID is required', 400);
 
-            // Delete all conversations for the user from the database
-             await prisma.chatBot.deleteMany({ where: { user_id: userId } });
+            // Delete all conversations for the user from the database via repository
+            await chatRepository.clearHistory(userId);
 
             // Send a success response back to the client
             res.json({ success: true, message: 'Conversation cleared', conversationHistory: [] });
