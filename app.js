@@ -21,7 +21,6 @@ BigInt.prototype.toJSON = function () {
 
 if(cluster.isPrimary){
   const totalCPUs = os.cpus().length;
-  
   const numCPUsToUse = Math.max(1, os.cpus().length - numLessCpus);
   
   console.log(`Total CPUs: ${totalCPUs} will run ${numCPUsToUse} workers.`);
@@ -47,6 +46,10 @@ if(cluster.isPrimary){
     }))
 
     // ── Routes ────────────────────────────────────────────────
+    const documentRoutes = require('./src/routes/documentRoutes')
+    app.use('/api/documents', documentRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/', userRoutes)
     app.use('/api/dashboard', dashboardRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/', userRoutes)
