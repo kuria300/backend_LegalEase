@@ -1,8 +1,8 @@
-const { prisma } = require('../config/db');
+const { db } = require('../config/db');
 
 //create a new password record linked to a user
 const createPassword = (userId, hashedPassword) => {
-    return prisma.passwords.create({
+    return db.passwords.create({
         data: {
             user_id: userId,
             password: hashedPassword
@@ -12,12 +12,12 @@ const createPassword = (userId, hashedPassword) => {
 
 //Retrieve a user's password for comparison during login
 const findByUserId = (userId) => {
-    return prisma.passwords.findUnique({where: {user_id: userId}});
+    return db.passwords.findUnique({where: {user_id: userId}});
 };
 
 //Update password
 const updatePassword = ( userId, hashedPassword )=> {
-    return prisma.passwords.update({
+    return db.passwords.update({
         where:{ user_id: userId},
         data: {password: hashedPassword},
     });
