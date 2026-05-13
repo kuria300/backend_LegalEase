@@ -1,9 +1,8 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
+const multerS3 = require("multer-s3");
+const s3 = require("../config/s3");
 const ErrorResponse = require("./ErrorObj");
 
-// Allowed MIME types — both document types and images (for lawyer ID scans etc.)
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -12,24 +11,19 @@ const ALLOWED_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-// Maps the incoming context field to a Cloudinary folder
-// Keeps uploads loosely organised without complex nesting (per MVP boundary)
 const FOLDER_MAP = {
   lawyer_application: "lawyer-applications",
   case_document: "case-documents",
 };
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
+const storage = multerS3({
+  s3,
+  bucket: process.env.AWS_S3_BUCKET_NAME,
+  contentType: multerS3.AUTO_CONTENT_TYPE, // handles PDFs, images, Word docs
+  key: (req, file, cb) => {
     const folder = FOLDER_MAP[req.body.context] ?? "case-documents";
-
-    return {
-      folder,
-      resource_type: "auto", // handles PDFs, images, Word docs
-      public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`,
-      allowed_formats: ["jpg", "jpeg", "png", "pdf", "doc", "docx"],
-    };
+    const key = `${folder}/${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`;
+    cb(null, key);
   },
 });
 
@@ -37,7 +31,6 @@ const fileFilter = (req, file, cb) => {
   if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    // Passes error into multer's error pipeline → caught by errorHandler
     cb(
       new ErrorResponse(
         `Unsupported file type: ${file.mimetype}. Allowed: jpg, png, pdf, doc, docx`,
