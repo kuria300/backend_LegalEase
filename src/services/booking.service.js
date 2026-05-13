@@ -1,4 +1,4 @@
-const { createBooking, getUserBookings } = require("../repositories/booking.repository");
+const { createBooking, getUserBookings, getLawyerBookings } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
 const { db } = require("../config/db")
 
@@ -79,5 +79,31 @@ const getUserBookingsService = async (user_id, page, limit) => {
     throw err;
   }
 };
+const getLawyerBookingsService = async (lawyer_id, page, limit) => {
+  try {
+    //ensure lawyer is authenticated
+    if(!lawyer_id){
+      throw new ErrorResponse("Lawyer Id is required", 400);
+    }
+    // default to the first page if not provided
+    const currentPage = parseInt(page) || 1;
 
-module.exports = { createBookingService, getUserBookingsService };
+    // default to 10 bookings per page if not provided
+    const pageLimit = parseInt(limit) || 10;
+
+    // ensure page number -> positive integer
+    if(currentPage < 1) {
+      throw new ErrorResponse("Page number must be greater than 0", 400);
+    }
+
+    // fetch paginated bookings 
+    const result = await getLawyerBookings(lawyer_id, currentPage, pageLimit);
+
+    return result;
+
+  } catch (err) {
+    throw err;
+  }
+}
+
+module.exports = { createBookingService, getUserBookingsService, getLawyerBookingsService };
