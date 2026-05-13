@@ -10,6 +10,8 @@ const ErrorResponse = require('./src/utils/ErrorObj')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
+const getCallBack= require('./src/routes/callbackRoute')
+const getCheckout = require('./src/routes/checkoutRoute')
 
 process.env.TZ= TZ
 
@@ -59,6 +61,10 @@ if(cluster.isPrimary){
     app.use('/api/chat', chatRoutes)
     app.use('/',userRoutes)
     app.use("/api/bookings", bookingRoutes);
+
+    // mpeesa Routes
+    app.use('/payments/callback', getCallBack)
+    app.use('/checkout', getCheckout)
 
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)

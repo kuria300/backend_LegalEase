@@ -36,4 +36,15 @@ const createBooking = async (data) => {
     }
 };
 
-module.exports = { createBooking };
+const findBookingWithLawyerProfile = async(bookingId) => {
+    return db.bookings.findUnique({
+        where: {
+            id: bookingId
+        },
+        include: {
+            lawyer_profile: true
+        }
+    });
+};
+
+module.exports = { createBooking , findBookingWithLawyerProfile};
