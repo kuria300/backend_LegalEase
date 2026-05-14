@@ -12,6 +12,9 @@ const chatService = require('./src/services/chatService');
 const documentService = require('./src/services/documentService');
 const ocrService = require('./src/services/ocrService');
 
+// Repositories
+const chatRepository = require('./src/repositories/chat.repository');
+
 // Controllers
 const chatController = require('./src/controllers/chatController');
 
@@ -39,6 +42,9 @@ module.exports = {
     chatService,
     documentService,
     ocrService,
+
+    // Repositories
+    chatRepository,
 
     // Controllers
     chatController,
