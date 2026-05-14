@@ -49,15 +49,41 @@ const sendOtp = async (req, res,next) => {
     next(error)
   }
 };
+
+//For otp registration no cookie, no jwt
+const verifyEmail = async (req, res, next) => {
+    try {
+        const result = await authService.verifyEmail(req.body);
+        return res.status(200).json({ success: true, ...result });
+    } catch (error) {
+        next(error);
+    }
+};
  
 //Router to verify otp
 const verifyOtp = async (req, res, next) => {
-  try {
-    const result = await authService.verifyOtp(req.body);
-    return res.status(200).json({ success: true, ...result });
-  } catch (error) {
-    next(error);
-  }
+    try {
+        const result = await authService.verifyOtp(req.body);
+
+        // JWT goes into cookie only — never exposed in response body
+        res.cookie('token', result.token, COOKIE_OPTIONS);
+
+        // return role so frontend knows which dashboard to redirect to
+        const dashboardMap = {
+            CLIENT: '/dashboard/user',
+            LAWYER: '/dashboard/lawyer',
+            ADMIN:  '/dashboard/admin',
+        };
+
+        return res.status(200).json({
+            success:   true,
+            message:   "Logged in successfully.",
+            role:      result.role,
+            redirect:  dashboardMap[result.role] || '/dashboard/user'
+        });
+    } catch (error) {
+        next(error);
+    }
 };
  
-module.exports = {login, register, logout, sendOtp, verifyOtp};
+module.exports = {login, register, logout, sendOtp, verifyOtp, verifyEmail};

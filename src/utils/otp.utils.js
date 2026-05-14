@@ -8,7 +8,7 @@ const generateOtp = () => {
 
 //Returns a timestamp 10 min from now
 const otpExpiresAt = () => {
-  return new Date(Date.now() + 10 * 60 * 1000);
+  return new Date(Date.now() + 3 * 60 * 1000);
 };
  
 //Handles connection to the email services
@@ -27,7 +27,7 @@ const sendOtpEmail = async (to, otp) => {
     from: `"LegalEase" <${process.env.EMAIL_FROM}>`,
     to,
     subject: "Your LegalEase verification code",
-    text: `Your verification code is: ${otp}\n\nThis code expires in 10 minutes. Do not share it with anyone.`,
+    text: `Your verification code is: ${otp}\n\nThis code expires in 3 minutes. Do not share it with anyone.`,
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #1a1a2e;">LegalEase Verification</h2>
@@ -36,7 +36,7 @@ const sendOtpEmail = async (to, otp) => {
           ${otp}
         </div>
         <p style="color: #666; font-size: 13px;">
-          This code expires in 10 minutes. If you did not request this, ignore this email.
+          This code expires in 3 minutes. If you did not request this, ignore this email.
         </p>
       </div>
     `,
