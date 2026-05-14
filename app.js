@@ -7,7 +7,8 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
-const { chatRoutes, testConnection } = require('./ai')
+const chatRoutes = require('./src/routes/chatRoutes')
+const { testConnection } = require('./src/config/openai')
 const userRoutes = require('./src/routes/user.routes')
 
 process.env.TZ= TZ
@@ -55,6 +56,10 @@ if(cluster.isPrimary){
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
 
+    app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
     app.use('/api/chat', chatRoutes)
     app.use('/',userRoutes)
 

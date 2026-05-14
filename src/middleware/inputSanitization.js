@@ -7,37 +7,40 @@ const ErrorResponse = require('../utils/ErrorObj.js');
 // Middleware function to validate and sanitize user registration input I'll use requests, response, and next as parameters
 const sanitizeInput = (req, res, next) => {
     try {
-        const {message} = req.body;
-        //message to be sent if the input is invalid and it should be less than 5000 characters.
-        //  I'll also trim the message and escape any special characters to prevent XSS attacks.
-        //  If the message is empty after trimming, I'll throw an error as well.
+        const { message } = req.body;
+
         if (message) {
             if (message.length > 5000) {
                 throw new ErrorResponse('Message is too long. Maximum length is 5000 characters.', 400);
-               }
-               req.body.message = validator.escape(validator.trim(message)); // Sanitize the message input by trimming whitespace and escaping special characters
-               if (req.body.message.length === 0) {
-                throw new ErrorResponse('Message cannot be empty.', 400);
-               }
             }
-            next();
-        } catch (error) {
-            next(error);
+
+            // trim only, escape breaks the message sent to OpenAI
+            req.body.message = validator.trim(message);
+
+            if (req.body.message.length === 0) {
+                throw new ErrorResponse('Message cannot be empty.', 400);
+            }
         }
-    };
+
+        next();
+    } catch (error) {
+        next(error);
+    }
+};
 //Check the user id I'll use uuid validation to ensure that the user id is in the correct format. I'll check both the request body and parameters for the user id. 
 const validateUserId = (req, res, next) => {
     try {
-        const userId = req.body.userId || req.params.userId; // Check both body and params for userId
+        const userId = (req.body && req.body.userId) || req.params.userId;
+        
         if (userId && !validator.isUUID(userId)) {
             throw new ErrorResponse('Invalid user ID format.', 400);
-
         }
         next();
     } catch (error) {
         next(error);
     }
-    };
+};
+
     module.exports = {
         sanitizeInput,
         validateUserId,

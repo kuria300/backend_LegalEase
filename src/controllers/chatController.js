@@ -154,6 +154,21 @@ class ChatController {
             next(err);
         }
     }
+
+    async clearHistory(req, res, next) {
+    try {
+        const userId = req.body.userId || req.params.userId;
+
+        if (!userId) throw new ErrorResponse('User ID is required', 400);
+
+        await prisma.chatBot.deleteMany({ where: { user_id: userId } });
+
+        res.json({ success: true, message: 'Conversation cleared', conversationHistory: [] });
+    } catch (err) {
+        next(err);
+        }
+    }
+
 }
 
 module.exports = new ChatController();
