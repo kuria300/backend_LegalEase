@@ -1,9 +1,7 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
+const minioClient = require("../config/minio");
 const ErrorResponse = require("./ErrorObj");
 
-// Allowed MIME types — both document types and images (for lawyer ID scans etc.)
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -12,38 +10,23 @@ const ALLOWED_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-// Maps the incoming context field to a Cloudinary folder
-// Keeps uploads loosely organised without complex nesting (per MVP boundary)
 const FOLDER_MAP = {
   lawyer_application: "lawyer-applications",
-  case_document:      "case-documents",
+  case_document: "case-documents",
 };
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    const folder = FOLDER_MAP[req.body.context] ?? "case-documents";
-
-    return {
-      folder,
-      resource_type: "auto",   // handles PDFs, images, Word docs
-      public_id: `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`,
-      allowed_formats: ["jpg", "jpeg", "png", "pdf", "doc", "docx"],
-    };
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    // Passes error into multer's error pipeline → caught by errorHandler
     cb(
       new ErrorResponse(
         `Unsupported file type: ${file.mimetype}. Allowed: jpg, png, pdf, doc, docx`,
-        415
+        415,
       ),
-      false
+      false,
     );
   }
 };
@@ -52,8 +35,24 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB hard cap
+    fileSize: 10 * 1024 * 1024,
   },
 });
 
-module.exports = upload;
+const uploadToMinio = async (req) => {
+  const folder = FOLDER_MAP[req.body.context] ?? "case-documents";
+  const fileName = `${folder}/${Date.now()}-${req.file.originalname.replace(/\s+/g, "_")}`;
+  const bucket = process.env.MINIO_BUCKET_NAME;
+
+  await minioClient.putObject(
+    bucket,
+    fileName,
+    req.file.buffer,
+    req.file.size,
+    { "Content-Type": req.file.mimetype },
+  );
+
+  return `http://${process.env.MINIO_END_POINT}:${process.env.MINIO_PORT}/${bucket}/${fileName}`;
+};
+
+module.exports = { upload, uploadToMinio };
