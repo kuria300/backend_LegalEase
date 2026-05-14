@@ -1,17 +1,12 @@
-const cloudinary = require("../config/cloudinary");
+const minioClient = require("../config/minio");
 const ErrorResponse = require("../utils/ErrorObj");
+const { uploadToMinio } = require("../utils/uploader");
 const {
   createDocument,
   findDocumentById,
   findDocuments,
   deleteDocument,
 } = require("../repositories/documentRepository");
-
-// Extracts Cloudinary public_id from a secure URL
-const extractPublicId = (fileUrl) => {
-  const match = fileUrl.match(/\/upload\/v\d+\/(.+)\.[^.]+$/);
-  return match ? match[1] : null;
-};
 
 // POST /api/documents/upload
 const uploadDocument = async (req, res, next) => {
@@ -26,8 +21,10 @@ const uploadDocument = async (req, res, next) => {
       return next(new ErrorResponse("user_id and booking_id are required", 400));
     }
 
+    const file_url = await uploadToMinio(req);
+
     const document = await createDocument({
-      file_url: req.file.path,
+      file_url,
       user_id,
       booking_id,
     });
@@ -88,10 +85,12 @@ const deleteDocumentHandler = async (req, res, next) => {
       return next(new ErrorResponse("Document not found", 404));
     }
 
-    const publicId = extractPublicId(document.file_url);
+    // Extract bucket key from MinIO URL
+    const url = new URL(document.file_url);
+    const key = url.pathname.slice(1).split("/").slice(1).join("/");
 
-    if (publicId) {
-      await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
+    if (key) {
+      await minioClient.removeObject(process.env.MINIO_BUCKET_NAME, key);
     }
 
     await deleteDocument(req.params.id);

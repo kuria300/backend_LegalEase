@@ -57,7 +57,13 @@ router.get(
     validateUserId,
     chatController.getDocumentHistory
 );
+// Route to delete chat history for a logged in user
 
+router.delete(
+    '/history/:userId',
+    validateUserId,
+    chatController.clearHistory
+);
 // Route to clear chat history for a logged in user
 // validateUserId - ensures the userId in the request body is a valid UUID
 // clearHistory - deletes all chat messages for the user from the database

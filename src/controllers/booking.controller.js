@@ -11,14 +11,15 @@ const ErrorResponse = require("../utils/ErrorObj");
 const createBooking = async (req, res, next) => {
   try {
     // Extract booking details from request body
-    const { lawyer_id, date, notes } = req.body;
+    const { lawyer_id, booking_date, booking_time, notes } = req.body;
     // extract authenticated user_id from JWT token
     const user_id = req.user.userId;
     // Call the service layer with all required booking data
     const booking = await createBookingService({
       user_id,
       lawyer_id,
-      date,
+      booking_date,
+      booking_time,
       notes,
     });
     // return success response with the created booking
@@ -122,7 +123,7 @@ const updateBookingStatus = async (req, res, next) => {
     // Get the new status from the req body
     const { booking_status } = req.body;
     // Get authenticated user Id from JWT
-    const user_id = req.user.id;
+    const user_id = req.user.userId;
 
     // Call service to validate & update the booking status
     const updatedBooking = await updateBookingStatusService(id, booking_status, user_id);
