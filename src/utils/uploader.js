@@ -19,7 +19,7 @@ const FOLDER_MAP = {
 const storage = multerS3({
   s3,
   bucket: process.env.AWS_S3_BUCKET_NAME,
-  contentType: multerS3.AUTO_CONTENT_TYPE, // handles PDFs, images, Word docs
+  contentType: multerS3.AUTO_CONTENT_TYPE,
   key: (req, file, cb) => {
     const folder = FOLDER_MAP[req.body.context] ?? "case-documents";
     const key = `${folder}/${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`;
@@ -45,7 +45,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB hard cap
+    fileSize: 10 * 1024 * 1024,
   },
 });
 

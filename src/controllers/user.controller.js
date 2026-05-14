@@ -1,47 +1,38 @@
 const userService = require('../services/user.service')
 
 //Returns all users
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
   try {
     const users = await userService.getAllUsers();
     return res.status(200).json({ success: true, data: users });
+
   } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to fetch users.",
-    });
+    next(error)
+    };
   }
-};
 
 //Returns users by id
-const getUserById = async (req, res) => {
+const getUserById = async (req, res,next) => {
   try {
     const user = await userService.getUserById(req.params.id);
     return res.status(200).json({ success: true, data: user });
   } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to fetch user.",
-    });
+    next(error);
+    }
   }
-};
 
 //Deletes user
-const deleteMe = async (req, res) => {
+const deleteMe = async (req, res, next) => {
   try {
-    const result = await userService.deleteAccount(req.user.userId);
+    const result = await userService.deleteUser(req.user.userId);
     return res.status(200).json({ success: true, ...result });
   } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      success: false,
-      message: error.message || "Failed to delete account.",
-    });
+    next(error);
   }
 };
-
 //returns the logged in user's profile
 
-const getMe = async ( req, res) => {
+const getMe = async ( req, res, next) => {
     try {
         const user = await userService.getProfile(req.user.userId);
         return res.status(200).json({
@@ -49,14 +40,11 @@ const getMe = async ( req, res) => {
             data:user
         });
     } catch (error) {
-        return res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || "Failed to fetch profile.",
-        });   
+      next(error);  
     }
 };
 
-const updateMe = async (req,res) => {
+const updateMe = async (req,res,next) => {
     try {
         const updated = await userService.updateProfile(req.user.userId,req.body);
         return res.status(200).json({
@@ -65,11 +53,7 @@ const updateMe = async (req,res) => {
         });
 
     } catch (error) {
-        return res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message || "Failed to update profile.",
-        });
-        
+      next(error);  
     }
 };
 

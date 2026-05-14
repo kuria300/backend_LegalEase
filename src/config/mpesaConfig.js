@@ -9,6 +9,7 @@ module.exports={
       passkey: process.env.PASSKEY,
       authEndpoint: process.env.AUTH_TOKEN_ENDPOINT,
       callBackUrl: process.env.CALLBACKURL,
-      stkPushEndpoint: process.env.STK_PUSH_ENDPOINT
+      stkPushEndpoint: process.env.STK_PUSH_ENDPOINT,
+      statusEndpoint: process.env.STATUS_ENDPOINT
     }
 }

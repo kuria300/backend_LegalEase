@@ -1,13 +1,23 @@
-const { db } = require("../config/db");
-const cloudinary = require("../config/cloudinary");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = require("../config/s3");
 const ErrorResponse = require("../utils/ErrorObj");
+const {
+  createDocument,
+  findDocumentById,
+  findDocuments,
+  deleteDocument,
+} = require("../repositories/documentRepository");
 
-// Extracts Cloudinary public_id from a secure URL
-// "https://res.cloudinary.com/xxx/image/upload/v123/case-documents/abc.pdf"
-// → "case-documents/abc"
-const extractPublicId = (fileUrl) => {
-  const match = fileUrl.match(/\/upload\/v\d+\/(.+)\.[^.]+$/);
-  return match ? match[1] : null;
+// Extracts S3 key from a URL
+// "https://my-legallease-project-2026.s3.eu-north-1.amazonaws.com/case-documents/abc.pdf"
+// → "case-documents/abc.pdf"
+const extractS3Key = (fileUrl) => {
+  try {
+    const url = new URL(fileUrl);
+    return url.pathname.slice(1);
+  } catch {
+    return null;
+  }
 };
 
 // POST /api/documents/upload
@@ -20,17 +30,13 @@ const uploadDocument = async (req, res, next) => {
     const { user_id, booking_id } = req.body;
 
     if (!user_id || !booking_id) {
-      return next(
-        new ErrorResponse("user_id and booking_id are required", 400),
-      );
+      return next(new ErrorResponse("user_id and booking_id are required", 400));
     }
 
-    const document = await prisma.documents.create({
-      data: {
-        file_url: req.file.path,
-        user_id,
-        booking_id,
-      },
+    const document = await createDocument({
+      file_url: req.file.location,
+      user_id,
+      booking_id,
     });
 
     res.status(201).json({ success: true, data: document });
@@ -45,9 +51,7 @@ const uploadDocument = async (req, res, next) => {
 // GET /api/documents/:id
 const getDocumentById = async (req, res, next) => {
   try {
-    const document = await prisma.documents.findUnique({
-      where: { id: req.params.id },
-    });
+    const document = await findDocumentById(req.params.id);
 
     if (!document) {
       return next(new ErrorResponse("Document not found", 404));
@@ -66,10 +70,7 @@ const getDocuments = async (req, res, next) => {
 
     if (!user_id && !booking_id) {
       return next(
-        new ErrorResponse(
-          "Provide at least one query param: user_id or booking_id",
-          400,
-        ),
+        new ErrorResponse("Provide at least one query param: user_id or booking_id", 400)
       );
     }
 
@@ -77,37 +78,35 @@ const getDocuments = async (req, res, next) => {
     if (user_id) where.user_id = user_id;
     if (booking_id) where.booking_id = booking_id;
 
-    const documents = await prisma.documents.findMany({
-      where,
-      orderBy: { uploaded_at: "desc" },
-    });
+    const documents = await findDocuments(where);
 
-    res
-      .status(200)
-      .json({ success: true, count: documents.length, data: documents });
+    res.status(200).json({ success: true, count: documents.length, data: documents });
   } catch (error) {
     next(error);
   }
 };
 
 // DELETE /api/documents/:id
-const deleteDocument = async (req, res, next) => {
+const deleteDocumentHandler = async (req, res, next) => {
   try {
-    const document = await prisma.documents.findUnique({
-      where: { id: req.params.id },
-    });
+    const document = await findDocumentById(req.params.id);
 
     if (!document) {
       return next(new ErrorResponse("Document not found", 404));
     }
 
-    const publicId = extractPublicId(document.file_url);
+    const key = extractS3Key(document.file_url);
 
-    if (publicId) {
-      await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
+    if (key) {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+        }),
+      );
     }
 
-    await prisma.documents.delete({ where: { id: req.params.id } });
+    await deleteDocument(req.params.id);
 
     res.status(200).json({ success: true, message: "Document deleted" });
   } catch (error) {
@@ -115,9 +114,4 @@ const deleteDocument = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  uploadDocument,
-  getDocumentById,
-  getDocuments,
-  deleteDocument,
-};
+module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument: deleteDocumentHandler };
