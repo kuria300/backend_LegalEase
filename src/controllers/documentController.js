@@ -1,24 +1,12 @@
-const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const s3 = require("../config/s3");
+const minioClient = require("../config/minio");
 const ErrorResponse = require("../utils/ErrorObj");
+const { uploadToMinio } = require("../utils/uploader");
 const {
   createDocument,
   findDocumentById,
   findDocuments,
   deleteDocument,
 } = require("../repositories/documentRepository");
-
-// Extracts S3 key from a URL
-// "https://my-legallease-project-2026.s3.eu-north-1.amazonaws.com/case-documents/abc.pdf"
-// → "case-documents/abc.pdf"
-const extractS3Key = (fileUrl) => {
-  try {
-    const url = new URL(fileUrl);
-    return url.pathname.slice(1); // removes leading "/"
-  } catch {
-    return null;
-  }
-};
 
 // POST /api/documents/upload
 const uploadDocument = async (req, res, next) => {
@@ -33,8 +21,10 @@ const uploadDocument = async (req, res, next) => {
       return next(new ErrorResponse("user_id and booking_id are required", 400));
     }
 
+    const file_url = await uploadToMinio(req);
+
     const document = await createDocument({
-      file_url: req.file.location, // S3 URL (was req.file.path in Cloudinary)
+      file_url,
       user_id,
       booking_id,
     });
@@ -95,15 +85,12 @@ const deleteDocumentHandler = async (req, res, next) => {
       return next(new ErrorResponse("Document not found", 404));
     }
 
-    const key = extractS3Key(document.file_url);
+    // Extract bucket key from MinIO URL
+    const url = new URL(document.file_url);
+    const key = url.pathname.slice(1).split("/").slice(1).join("/");
 
     if (key) {
-      await s3.send(
-        new DeleteObjectCommand({
-          Bucket: process.env.AWS_S3_BUCKET_NAME,
-          Key: key,
-        }),
-      );
+      await minioClient.removeObject(process.env.MINIO_BUCKET_NAME, key);
     }
 
     await deleteDocument(req.params.id);
@@ -114,9 +101,4 @@ const deleteDocumentHandler = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  uploadDocument,
-  getDocumentById,
-  getDocuments,
-  deleteDocument: deleteDocumentHandler,
-};
+module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument: deleteDocumentHandler };
