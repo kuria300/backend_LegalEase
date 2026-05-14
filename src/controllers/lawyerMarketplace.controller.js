@@ -27,7 +27,8 @@ exports.fetchAllLawyers = async (req, res, next) => {
 // GET SINGLE LAWYER
 exports.fetchLawyerById = async (req, res, next) => {
   try {
-    const lawyer = await getLawyerById(req.params.id);
+    const lawyerId= req.params.id
+    const lawyer = await getLawyerById(lawyerId);
 
     if (!lawyer) {
       return next(new ErrorResponse("Lawyer not found", 404));

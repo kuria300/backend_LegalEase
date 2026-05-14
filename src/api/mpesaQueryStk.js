@@ -31,9 +31,9 @@ const queryStkApi = async(token, checkoutReqID)=>{
     }catch(error){
         if(error.response){
             console.log('error', error.response.data)
-            throw new ThrowError(error.response.data.errorMessage, 400)
+            throw new ErrorResponse(error.response.data.errorMessage, 400)
         }
-        throw new ThrowError(error.message || 'Something went wrong.Please try again', 500)
+        throw new ErrorResponse(error.message ,500)
     }
 
 }

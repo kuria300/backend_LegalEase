@@ -75,6 +75,7 @@ if(cluster.isPrimary){
     app.use('/payments/callback', getCallBack)
     app.use('/checkout', getCheckout)
     app.use('/check-status', getStatus)
+  
 
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
