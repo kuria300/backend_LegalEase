@@ -25,7 +25,7 @@ router.get("/lawyer", authenticate, authorise("LAWYER"), getLawyerBookings);
 router.get("/:id", authenticate, getUserBookingById);
 
 // PUT /api/bookings/:id/status - update booking status (Task 4)
-router.put("/:id/status", authenticate, updateBookingStatus);
+router.put("/status/:id", authenticate, updateBookingStatus);
 
 //DELETE /api/bookings/:id
 router.delete("/:id", authenticate, deleteBooking);

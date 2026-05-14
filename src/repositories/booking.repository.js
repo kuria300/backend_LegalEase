@@ -8,7 +8,8 @@ const createBooking = async (data) => {
         const existingBooking = await db.bookings.findFirst({
             where: {
                 lawyer_id: data.lawyer_id,
-                date: data.date,
+                booking_date: data.booking_date,
+                booking_time: data.booking_time,
                 booking_status: {
                     notIn: ["CANCELLED"]
                 }
@@ -24,7 +25,8 @@ const createBooking = async (data) => {
             data: {
                 user_id: data.user_id,
                 lawyer_id: data.lawyer_id,
-                date: data.date,
+                booking_date: data.booking_date,
+                booking_time: data.booking_time,
                 notes: data.notes,
                 payment_status: "PENDING",
                 booking_status: "PENDING"
@@ -80,7 +82,7 @@ const getUserBookings = async (user_id, page, limit) => {
             },
             // show most recent bookings first
             orderBy: {
-                date: "desc"
+                booking_date: "desc"
             },
             skip: skip,
             // limit records to the page size
@@ -128,7 +130,7 @@ const getLawyerBookings = async (lawyer_id, page, limit) => {
                 payments: true
             },
             orderBy: {
-                date: "desc"
+                booking_date: "desc"
             },
             skip: skip,
             // Limit records to the page size
@@ -225,7 +227,7 @@ const updatePaymentBookingStatus = async (booking_status, payment_status, bookin
         });
         // If booking not found, throw a 404 error
         if(!existingBooking){
-            throw new ErrorResponse(`Booking with ID: ${booking_id} not found`, 404)
+            throw new ErrorResponse("Booking not found", 404)
         }
         //update both payment_status and booking_status
         const updatedBooking = await db.bookings.update({

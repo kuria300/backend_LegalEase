@@ -1,7 +1,7 @@
 generator client {
   provider               = "prisma-client-js"
-  previewFeatures        = ["partialIndexes"]
   output                 = "./src/generated/prisma"
+  previewFeatures        = ["partialIndexes"]
   generatedFileExtension = "js"
   moduleFormat           = "cjs"
 }
@@ -13,12 +13,13 @@ datasource db {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model bookings {
   id                              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  date                            DateTime
+  booking_date                    DateTime
   payment_status                  payment_status @default(PENDING)
   notes                           String?        @db.VarChar(1000)
   booking_status                  booking_status @default(PENDING)
   user_id                         String         @db.Uuid
   lawyer_id                       String         @db.Uuid
+  booking_time                    DateTime?      @db.Time(6)
   users_bookings_lawyer_idTousers users          @relation("bookings_lawyer_idTousers", fields: [lawyer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users_bookings_user_idTousers   users          @relation("bookings_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   documents                       documents[]
@@ -103,7 +104,7 @@ model users {
   created_at                         DateTime             @default(now())
   deleted_at                         DateTime?
   otp_hash                           String?              @db.VarChar(255)
-  otp_expires_at                     DateTime?            @db.Date
+  otp_expires_at                     DateTime?            @db.Timestamp(6)
   bookings_bookings_lawyer_idTousers bookings[]           @relation("bookings_lawyer_idTousers")
   bookings_bookings_user_idTousers   bookings[]           @relation("bookings_user_idTousers")
   chatbots                           chatbots[]
