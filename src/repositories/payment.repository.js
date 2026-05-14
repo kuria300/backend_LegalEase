@@ -57,7 +57,7 @@ const markPaymentSuccessIfPending = async ({paymentId ,mpesaReceipt ,phoneNumber
     });
 };
 
-const updatePaymnetSuccesIfPending = async (tx, { paymentId, mpesaReceipt, phoneNumber}) => {
+const updatePaymnetSuccesIfPending = async (tx, { paymentId, mpesaReceipt}) => {
     return tx.payments.updateMany({
         where: {
             id: paymentId,
@@ -66,8 +66,7 @@ const updatePaymnetSuccesIfPending = async (tx, { paymentId, mpesaReceipt, phone
 
         data: {
             status: 'SUCCESS',
-            mpesa_receipt: mpesaReceipt,
-            number: String(phoneNumber)
+            mpesa_receipt: String(mpesaReceipt)
         }
     });
 };
@@ -79,7 +78,7 @@ const updatePayment = async(tx, {paymentId, mpesaReceipt, phoneNumber}) =>{
         },
         data: {
             status: 'SUCCESS',
-            mpesa_receipt: mpesaReceipt,
+            mpesa_receipt: String(mpesaReceipt),
             number: String(phoneNumber)
         }
     })
@@ -101,7 +100,7 @@ const confirmBooking = async(tx, bookingId) => {
 const findPaymentSuccessPending = async(bookingId)=>{
    return db.payments.findFirst({
             where: {
-                booking_id: booking_id,
+                booking_id: bookingId,
             status: {
                 in: ['PENDING', 'SUCCESS']
             }

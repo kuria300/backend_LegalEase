@@ -95,6 +95,7 @@ if(cluster.isPrimary){
     app.use('/payments/callback', getCallBack)
     app.use('/checkout', getCheckout)
     app.use('/check-status', getStatus)
+  
 
     // Health check route to verify the server is running, useful for monitoring and frontend connectivity checks
     app.get('/api/health', (req, res) => {

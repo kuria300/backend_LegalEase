@@ -1,6 +1,6 @@
 const { db }= require('../config/db')
 const {findUniqueByCheckoutReqId, upsertPendingCallback, markPaymentFailedIfPending, confirmBooking, updatePayment, deleteCallback}=require('../repositories/payment.repository')
-
+const { sendEmailService } =require('./email.paymentservice')
 // this will be called when callback arrives early than db update finishes
 const processStkCallback = async(payload) => {
     const callbackStk = payload.Body.stkCallback;
@@ -45,7 +45,7 @@ const processStkCallback = async(payload) => {
 
     const phoneNumber = metadata.find((item) => item.Name === 'PhoneNumber')?.Value;
 
-    await db.$transaction(async (tx) => {
+    const success=await db.$transaction(async (tx) => {
 
         // we check if payment is pending if not return(stop)
         const currentPayment = await tx.payments.findUnique({
@@ -56,7 +56,7 @@ const processStkCallback = async(payload) => {
         // handle duplicate
         if (currentPayment.status !== 'PENDING') {
             console.log('Duplicate callback ignored');
-            return;
+            return false;
         }
 
         await updatePayment(tx, {
@@ -71,7 +71,45 @@ const processStkCallback = async(payload) => {
         await deleteCallback(tx, checkout_reqID)
 
         console.log('Payment processed successfully');
+
+        return true
     });
+
+    if(success){
+        const booking = await db.bookings.findUnique({
+        where:{
+          id: payment.id
+        },
+        include:{
+           users_bookings_lawyer_idTousers: true,
+           users_bookings_user_idTousers: true
+        }
+      })
+
+      const client = booking.users_bookings_user_idTousers
+      const lawyer= booking.users_bookings_lawyer_idTousers
+      
+      // send email to lawyer
+      await sendEmailService({
+        email: lawyer.email,
+        name: lawyer.first_name,
+        amount: payment.amount,
+        bookingId: booking.id,
+        mpesaReceipt,
+        role: lawyer.role
+      })
+
+      // send to client
+      await sendEmailService({
+        email: client.email,
+        name: client.first_name,
+        amount: payment.amount,
+        bookingId: booking.id,
+        mpesaReceipt,
+        role: client.role
+      })
+     console.log('Email sent successfully')
+    }
 };
 
 module.exports = { processStkCallback };

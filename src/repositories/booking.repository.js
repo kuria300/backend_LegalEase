@@ -44,9 +44,27 @@ const findBookingWithLawyerProfile = async(bookingId) => {
         where: {
             id: bookingId
         },
-        include: {
-            lawyer_profile: true
-        }
+         include: {
+            users_bookings_lawyer_idTousers: {
+            select: {
+                id: true,
+                first_name: true,
+                second_name: true,
+
+                lawyer_applications: {
+                select: {
+                    lawyer_profiles: {
+                    select: {
+                        consultation_fee: true,
+                        category: true,
+                        experience: true,
+                    },
+                    },
+                },
+                },
+            },
+            },
+        },
     });
 };
 

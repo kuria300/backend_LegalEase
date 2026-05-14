@@ -1,6 +1,8 @@
 const {db}= require('../config/db')
 const ErrorResponse = require('../utils/ErrorObj')
 const { findUnique, upsertPendingCallback, markPaymentFailedIfPending, updatePaymnetSuccesIfPending, confirmBooking, findUniqueByCheckoutReqId }=require('../repositories/payment.repository')
+const { sendEmailService }=require('../services/email.paymentservice')
+
 
 const callbackEndPoint = async (req,res, next)=>{
 
@@ -93,11 +95,12 @@ const callbackEndPoint = async (req,res, next)=>{
 
     const phoneNumber = metadata.find((item)=>item.Name === 'PhoneNumber')?.Value
 
-    await db.$transaction(async (tx) => {
+    const success=await db.$transaction(async (tx) => {
     // Re-check status so we only update where status is pendig
     const currentPayment = await tx.payments.findUnique({ where: { id: payment.id } });
-    if (currentPayment.status !== 'PENDING') return;
-
+    if (currentPayment.status !== 'PENDING'){
+      return false;
+    }
     const updated= await updatePaymnetSuccesIfPending(tx, {
       paymentId: payment.id,
       mpesaReceipt,
@@ -105,11 +108,49 @@ const callbackEndPoint = async (req,res, next)=>{
     })
     // allow only one payment if 2 callbacks come
     if(updated.count === 0){
-      return
+      return false
     }
 
      await confirmBooking(tx, payment.booking_id)
+
+     return true
     });
+
+    if(success){
+      const booking = await db.bookings.findUnique({
+        where:{
+          id: payment.booking_id
+        },
+        include:{
+           users_bookings_lawyer_idTousers: true,
+           users_bookings_user_idTousers: true
+        }
+      })
+
+      const client = booking.users_bookings_user_idTousers
+      const lawyer= booking.users_bookings_lawyer_idTousers
+      
+      // send email to lawyer
+      await sendEmailService({
+        email: lawyer.email,
+        name: lawyer.first_name,
+        amount: payment.amount,
+        bookingId: booking.id,
+        mpesaReceipt,
+        role: lawyer.role
+      })
+
+      // send to client
+      await sendEmailService({
+        email: client.email,
+        name: client.first_name,
+        amount: payment.amount,
+        bookingId: booking.id,
+        mpesaReceipt,
+        role:client.role
+      })
+     console.log('Email sent successfully')
+    }
 
       return res.json({
         ResultCode: 0,
