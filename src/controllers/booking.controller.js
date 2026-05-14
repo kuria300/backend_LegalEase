@@ -13,7 +13,7 @@ const createBooking = async (req, res, next) => {
     // Extract booking details from request body
     const { lawyer_id, booking_date, booking_time, notes } = req.body;
     // extract authenticated user_id from JWT token
-    const user_id = req.user.user_id;
+    const user_id = req.user.userId;
     // Call the service layer with all required booking data
     const booking = await createBookingService({
       user_id,
@@ -37,7 +37,7 @@ const createBooking = async (req, res, next) => {
 const getUserBookings = async (req, res, next) => {
   try {
     // Get logged in user ID from JWT token
-    const user_id = req.user.user_id;
+    const user_id = req.user.userId;
 
     // Extract pagination params from query string -> eg. ?page=1&limit=10
     const { page, limit } = req.query;
@@ -64,7 +64,7 @@ const getUserBookings = async (req, res, next) => {
 const getLawyerBookings = async (req, res, next)=>{
   try {
     // Get lawyer id from JWT
-    const lawyer_id = req.user.user_id;
+    const lawyer_id = req.user.userId;
 
     // exract pagination parameters from query string
     const { page, limit } = req.query;
@@ -93,7 +93,7 @@ const getUserBookingById = async (req, res, next) => {
     const { id } = req.params;
 
     // get authenticated user id from JWT token
-    const user_id = req.user.user_id;
+    const user_id = req.user.userId;
 
     // fetch the booking from the service
     const booking = await getBookingById(id);
@@ -123,7 +123,7 @@ const updateBookingStatus = async (req, res, next) => {
     // Get the new status from the req body
     const { booking_status } = req.body;
     // Get authenticated user Id from JWT
-    const user_id = req.user.user_id;
+    const user_id = req.user.userId;
 
     // Call service to validate & update the booking status
     const updatedBooking = await updateBookingStatusService(id, booking_status, user_id);
@@ -143,7 +143,7 @@ const deleteBooking = async (req, res, next)=>{
   try {
     const { id } = req.params;
     //get user id from JWT token
-    const user_id = req.user.user_id;
+    const user_id = req.user.userId;
     //call service to validate and delete the booking
     await deleteBookingService(id, user_id);
 

@@ -66,7 +66,7 @@ const createBookingService = async (data) => {
     }
 
     //Restrict bookings between 8AM and 5PM
-    const bookingHour = parseDateDef.getHours();
+    const bookingHour = parsedDate.getHours();
     if (bookingHour < 8 || bookingHour >= 17) {
       throw new ErrorResponse(
         "Bookings are only allowed between 8AM and 5PM",
