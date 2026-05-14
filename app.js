@@ -16,6 +16,7 @@ const adminRoutes = require('./src/routes/adminRoutes')
 // User, booking and lawyer routes
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");
+const lawyerRoutes = require('./src/routes/lawyerRoutes')
 const lawyerMarketplaceRoutes = require("./src/routes/lawyerMarketplace.routes");
 const lawyerProfile = require('./src/routes/lawyerProfileRoutes')
 // M-Pesa payment routes
@@ -73,6 +74,16 @@ if(cluster.isPrimary){
     app.use('/api/chat', chatRoutes)
     app.use('/api/dashboard', dashboardRoutes)
     app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/api/admin',adminRoutes);
+    app.use("/api/bookings", bookingRoutes);
+    app.use ('/api/lawyer', lawyerRoutes)
+
+    app.use("/api/bookings", bookingRoutes);
+    app.use ("/api/lawyers", lawyerMarketplaceRoutes);
+
+    app.use('/api/chat', chatRoutes)
+    app.use('/api/user',userRoutes)
     app.use('/api/admin', adminRoutes)
     app.use('/api/bookings', bookingRoutes)
     app.use('/api/lawyers', lawyerMarketplaceRoutes)
@@ -93,7 +104,6 @@ if(cluster.isPrimary){
     // ── Error handler (must be last) ──────────────────────────
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
-
     app.listen(PORT, ()=>{
         console.log(`server running on port ${PORT}`)
     })
