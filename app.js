@@ -6,8 +6,12 @@ const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
 const { errorHandler }= require('./src/middleware/errorHandler')
 const ErrorResponse = require('./src/utils/ErrorObj')
+const dashboardRoutes = require('./src/routes/dashboardRoutes')
+const lawyerDashboardRoutes = require('./src/routes/lawyerDashboardRoutes')
+const adminRoutes = require('./src/routes/adminRoutes')
 const { chatRoutes, testConnection } = require('./ai')
 const userRoutes = require('./src/routes/user.routes')
+const bookingRoutes = require("./src/routes/booking.routes");
 
 process.env.TZ= TZ
 
@@ -30,7 +34,7 @@ if(cluster.isPrimary){
     cluster.fork();
   })
 
-} else {
+}else{
     const app= express()
     app.use(express.json());
     app.use(express.urlencoded({extended: true}))
@@ -46,6 +50,17 @@ if(cluster.isPrimary){
     app.use('/api/documents', documentRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/', userRoutes)
+    app.use('/api/dashboard', dashboardRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/', userRoutes)
+    app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
+    app.use('/api/chat', chatRoutes)
+    app.use('/', userRoutes)
+    app.use('/api/admin',adminRoutes);
+
+    app.use('/api/chat', chatRoutes)
+    app.use('/',userRoutes)
+    app.use("/api/bookings", bookingRoutes);
 
     // ── Error handler (must be last) ──────────────────────────
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
