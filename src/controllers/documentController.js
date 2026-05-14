@@ -1,4 +1,5 @@
-const cloudinary = require("../config/cloudinary");
+const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = require("../config/s3");
 const ErrorResponse = require("../utils/ErrorObj");
 const {
   createDocument,
@@ -7,10 +8,16 @@ const {
   deleteDocument,
 } = require("../repositories/documentRepository");
 
-// Extracts Cloudinary public_id from a secure URL
-const extractPublicId = (fileUrl) => {
-  const match = fileUrl.match(/\/upload\/v\d+\/(.+)\.[^.]+$/);
-  return match ? match[1] : null;
+// Extracts S3 key from a URL
+// "https://my-legallease-project-2026.s3.eu-north-1.amazonaws.com/case-documents/abc.pdf"
+// → "case-documents/abc.pdf"
+const extractS3Key = (fileUrl) => {
+  try {
+    const url = new URL(fileUrl);
+    return url.pathname.slice(1); // removes leading "/"
+  } catch {
+    return null;
+  }
 };
 
 // POST /api/documents/upload
@@ -27,7 +34,7 @@ const uploadDocument = async (req, res, next) => {
     }
 
     const document = await createDocument({
-      file_url: req.file.path,
+      file_url: req.file.location, // S3 URL (was req.file.path in Cloudinary)
       user_id,
       booking_id,
     });
@@ -88,10 +95,15 @@ const deleteDocumentHandler = async (req, res, next) => {
       return next(new ErrorResponse("Document not found", 404));
     }
 
-    const publicId = extractPublicId(document.file_url);
+    const key = extractS3Key(document.file_url);
 
-    if (publicId) {
-      await cloudinary.uploader.destroy(publicId, { resource_type: "auto" });
+    if (key) {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+        }),
+      );
     }
 
     await deleteDocument(req.params.id);
@@ -102,4 +114,9 @@ const deleteDocumentHandler = async (req, res, next) => {
   }
 };
 
-module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument: deleteDocumentHandler };
+module.exports = {
+  uploadDocument,
+  getDocumentById,
+  getDocuments,
+  deleteDocument: deleteDocumentHandler,
+};
