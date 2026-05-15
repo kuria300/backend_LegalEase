@@ -9,6 +9,19 @@ const {
 const ErrorResponse = require("../utils/ErrorObj");
 const { db } = require("../config/db");
 
+// Fixed 30-minute booking slots between 8AM and 5PM
+const VALID_SLOTS = [
+  "08:00", "08:30",
+  "09:00", "09:30",
+  "10:00", "10:30",
+  "11:00", "11:30",
+  "12:00", "12:30",
+  "13:00", "13:30",
+  "14:00", "14:30",
+  "15:00", "15:30",
+  "16:00", "16:30",
+];
+
 const createBookingService = async (data) => {
   try {
     // extract required fields from the incoming data
@@ -20,6 +33,11 @@ const createBookingService = async (data) => {
         "Lawyer ID, booking date, and booking time are required",
         400,
       );
+    }
+
+    // Validate booking time to restrict custom slots
+    if(!VALID_SLOTS.includes(booking_time)){
+      throw new ErrorResponse("Invalid booking time. Select one of the available slots.", 400)
     }
 
     //Otherwise -> parse and validate the date
@@ -93,10 +111,97 @@ const createBookingService = async (data) => {
       user_id,
       lawyer_id,
       booking_date: parsedDate,
-      booking_time,
+      booking_time: booking_date,
       notes,
     });
     return booking;
+  } catch (err) {
+    throw err;
+  }
+};
+// Export available slots -> to be displayed in the frontend
+const getAvailableSlotsService = async (lawyer_id, booking_date) => {
+  try {
+    // Ensure required fields are present
+    if (!lawyer_id || !booking_date) {
+      throw new ErrorResponse("Lawyer ID and booking date are required", 400);
+    }
+
+    // Parse and validate the date
+    const parsedDate = new Date(booking_date);
+    if (isNaN(parsedDate.getTime())) {
+      throw new ErrorResponse("Invalid date format provided", 400);
+    }
+
+    // Restrict to Monday - Friday
+    const day = parsedDate.getDay();
+    if (day === 0 || day === 6) {
+      throw new ErrorResponse(
+        "Bookings are only available from Monday - Friday",
+        400,
+      );
+    }
+
+    // Fetch all booked slots for this lawyer on this date
+    const bookedSlots = await db.bookings.findMany({
+      where: {
+        lawyer_id: lawyer_id,
+        booking_date: {
+          // Get all bookings for the same day
+          gte: new Date(parsedDate.setHours(0, 0, 0, 0)),
+          lt: new Date(parsedDate.setHours(23, 59, 59, 999))
+        },
+        // Ignore cancelled bookings
+        booking_status: {
+          notIn: ["CANCELLED"]
+        }
+      },
+      select: {
+        // Only fetch booking_time
+        booking_time: true
+      }
+    });
+
+    // Extract booked time strings
+    const bookedTimes = bookedSlots.map(b => {
+      const time = new Date(b.booking_time);
+      const hh = String(time.getHours()).padStart(2, "0");
+      const mm = String(time.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    });
+
+    // restrict past dates and past time slots for today
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const requestedDateOnly = new Date(parsedDate);
+    requestedDateOnly.setHours(0,0,0,0);
+
+    const isToday = requestedDateOnly.getTime() === today.getTime();
+
+    if(requestedDateOnly < today){
+      throw new ErrorResponse("Cannot fetch slots for past date", 400);
+    }
+
+    // Filter out booked slots from all valid slots
+    const availableSlots = VALID_SLOTS.filter((slot)=> {
+      if(!isToday) return true;
+
+      const [hours, minutes] = slot.split(":").map(Number);
+
+      const slotTime = new Date();
+      slotTime.setHours(hours, minutes, 0, 0);
+
+      return slotTime > now
+    }).map(slot => ({
+      time: slot,
+      // Mark each slot as available or booked
+      available: !bookedTimes.includes(slot)
+    }));
+
+    return availableSlots;
+
   } catch (err) {
     throw err;
   }
@@ -237,5 +342,6 @@ module.exports = {
   getUserBookingsService, 
   getLawyerBookingsService,
   updateBookingStatusService,
-  deleteBookingService
+  deleteBookingService,
+  getAvailableSlotsService
 };
