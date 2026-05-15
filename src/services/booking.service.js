@@ -111,7 +111,7 @@ const createBookingService = async (data) => {
       user_id,
       lawyer_id,
       booking_date: parsedDate,
-      booking_time: booking_time,
+      booking_time: booking_date,
       notes,
     });
     return booking;
@@ -170,8 +170,31 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
       return `${hh}:${mm}`;
     });
 
+    // restrict past dates and past time slots for today
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const requestedDateOnly = new Date(parsedDate);
+    requestedDateOnly.setHours(0,0,0,0);
+
+    const isToday = requestedDateOnly.getTime() === today.getTime();
+
+    if(requestedDateOnly < today){
+      throw new ErrorResponse("Cannot fetch slots for past date", 400);
+    }
+
     // Filter out booked slots from all valid slots
-    const availableSlots = VALID_SLOTS.map(slot => ({
+    const availableSlots = VALID_SLOTS.filter((slot)=> {
+      if(!isToday) return true;
+
+      const [hours, minutes] = slot.split(":").map(Number);
+
+      const slotTime = new Date();
+      slotTime.setHours(hours, minutes, 0, 0);
+
+      return slotTime > now
+    }).map(slot => ({
       time: slot,
       // Mark each slot as available or booked
       available: !bookedTimes.includes(slot)
