@@ -93,7 +93,7 @@ const createBookingService = async (data) => {
       user_id,
       lawyer_id,
       booking_date: parsedDate,
-      booking_time,
+      booking_time: parsedDate,
       notes,
     });
     return booking;
