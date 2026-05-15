@@ -3,7 +3,8 @@ const {
   getUserBookingsService, 
   getLawyerBookingsService,
   updateBookingStatusService,
-  deleteBookingService 
+  deleteBookingService,
+  getAvailableSlotsService 
 } = require("../services/booking.service");
 const { getBookingById } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
@@ -32,6 +33,26 @@ const createBooking = async (req, res, next) => {
     next(err);
   }
 };
+
+const getAvailableSlots = async (req, res, next) => {
+    try {
+        // Get lawyer_id and booking_date from query params
+        const { lawyer_id, booking_date } = req.query;
+
+        // Call service to get available slots
+        const slots = await getAvailableSlotsService(lawyer_id, booking_date);
+
+        return res.status(200).json({
+            success: true,
+            message: "Available slots retrieved successfully",
+            data: slots
+        });
+
+    } catch (err) {
+        next(err);
+    }
+};
+
 // User booking routes
 
 const getUserBookings = async (req, res, next) => {
@@ -159,7 +180,8 @@ const deleteBooking = async (req, res, next)=>{
 
 module.exports = { 
   createBooking, 
-  getUserBookings, 
+  getUserBookings,
+  getAvailableSlots,
   getLawyerBookings,
   getUserBookingById,
   updateBookingStatus,

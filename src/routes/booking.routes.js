@@ -3,7 +3,8 @@ const router = express.Router();
 
 const { 
     createBooking, 
-    getUserBookings, 
+    getUserBookings,
+    getAvailableSlots, 
     getLawyerBookings,
     getUserBookingById, 
     updateBookingStatus, 
@@ -20,6 +21,9 @@ router.get("/user", authenticate, getUserBookings);
 
 // GET /api/bookings/lawyer
 router.get("/lawyer", authenticate, authorise("LAWYER"), getLawyerBookings);
+
+// GET /api/bookings/slots - get available slots for a lawyer on a date
+router.get("/slots", authenticate, getAvailableSlots);
 
 // GET /api/bookings/user/:id - get a single booking by ID
 router.get("/user/:id", authenticate, getUserBookingById);
