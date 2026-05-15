@@ -165,5 +165,19 @@ const forgotPassword = async ({ email, otp, newPassword, confirmPassword }) => {
 
     throw new ErrorResponse("Invalid request.", 400);
 };
+const sendOtp = async ({ email }) => {
+    const user = await userRepo.findByEmail(email);
+    if (!user) {
+        const error = new Error("No account found with this email.");
+        error.statusCode = 404;
+        throw error;
+    }
+    const otp       = generateOtp();
+    const otpHash   = await hashValue(otp);
+    const otpExpiry = otpExpiresAt();
+    await userRepo.saveOtp(user.id, otpHash, otpExpiry);
+    await sendOtpEmail(email, otp);
+    return { message: "Verification code sent. Check your email." };
+};
 
 module.exports = { login, register, verifyOtp, sendOtp, forgotPassword };
