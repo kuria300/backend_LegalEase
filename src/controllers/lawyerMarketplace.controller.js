@@ -7,7 +7,7 @@ const {
 
 
 // GET ALL LAWYERS
-exports.fetchAllLawyers = async (req, res, next) => {
+module.exports.fetchAllLawyers = async (req, res, next) => {
   try {
     const lawyers = await getAllLawyers();
 
@@ -25,7 +25,7 @@ exports.fetchAllLawyers = async (req, res, next) => {
 
 
 // GET SINGLE LAWYER
-exports.fetchLawyerById = async (req, res, next) => {
+module.exports.fetchLawyerById = async (req, res, next) => {
   try {
     const lawyerId= req.params.id
     const lawyer = await getLawyerById(lawyerId);
