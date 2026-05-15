@@ -92,7 +92,54 @@ const verifyOtp = async ({ email, otp }) => {
   return { token };
 
 }
+const forgotPassword = async ({ email, otp, newPassword, confirmPassword }) => {
+    if (email && !otp && !newPassword) {
+        const user = await userRepo.findByEmail(email);
+        if (!user) {
+            return { message: "If an account exists with this email, a reset code will be sent." };
+        }
 
-module.exports = { login, register, verifyOtp, sendOtp};
+        const otpValue = generateOtp();
+        const otpHash = await hashValue(otpValue);
+        const otpExpiry = otpExpiresAt();
+        await userRepo.saveOtp(user.id, otpHash, otpExpiry);
+        await sendOtpEmail(email, otpValue);
 
+        return { message: "If an account exists with this email, a reset code will be sent." };
+    }
 
+    if (email && otp && newPassword) {
+        console.log('forgotPassword called with:', { email, otp, newPassword, confirmPassword });
+        if (newPassword !== confirmPassword) {
+            throw new ErrorResponse("Passwords do not match.", 400);
+        }
+
+        const user = await userRepo.findByEmail(email);
+        if (!user) {
+            throw new ErrorResponse("Invalid request.", 400);
+        }
+
+        if (!user.otp_hash || !user.otp_expires_at) {
+            throw new ErrorResponse("No reset code was requested for this account.", 400);
+        }
+
+        if (new Date() > new Date(user.otp_expires_at)) {
+            throw new ErrorResponse("This code has expired. Please request a new one.", 400);
+        }
+
+        const isValid = await compareValue(otp, user.otp_hash);
+        if (!isValid) {
+            throw new ErrorResponse("Incorrect reset code.", 400);
+        }
+
+        const hashedPassword = await hashValue(newPassword);
+        await passwordRepo.updatePassword(user.id, hashedPassword);
+        await userRepo.clearOtp(user.id);
+
+        return { message: "Password reset successfully. You can now login with your new password." };
+    }
+
+    throw new ErrorResponse("Invalid request.", 400);
+};
+
+module.exports = { login, register, verifyOtp, sendOtp, forgotPassword };

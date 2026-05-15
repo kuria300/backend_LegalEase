@@ -59,5 +59,13 @@ const verifyOtp = async (req, res, next) => {
     next(error);
   }
 };
- 
-module.exports = {login, register, logout, sendOtp, verifyOtp};
+const forgotPassword = async (req, res, next) => {
+    try {
+        const result = await authService.forgotPassword(req.body);
+        return res.status(200).json({ success: true, ...result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { login, register, logout, sendOtp, verifyOtp, forgotPassword };
