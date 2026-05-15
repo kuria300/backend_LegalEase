@@ -15,9 +15,10 @@ const uploadDocument = async (req, res, next) => {
       return next(new ErrorResponse("No file received", 400));
     }
 
-    const { user_id, booking_id } = req.body;
+    const  user_id = req.user.userId;
+    const  booking_id = req.params.booking_id;
 
-    if (!user_id || !booking_id) {
+    if (!booking_id) {
       return next(new ErrorResponse("user_id and booking_id are required", 400));
     }
 
