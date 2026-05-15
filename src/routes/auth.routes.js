@@ -1,6 +1,7 @@
-const Router = require("express");
-const authController = require("../controllers/auth.controller");
-const { authenticate } = require("../middleware/auth.middleware");
+const { Router }   = require('express');
+const authController = require('../controllers/auth.controller');
+const { authenticate } = require('../middleware/auth.middleware');
+const { validate, registerSchema, loginSchema, otpSchema } = require('../middleware/validate.middleware');
 
 const router = Router();
 

@@ -5,9 +5,9 @@ const getUpcomingBookings = (lawyer_id) =>
     where: {
       lawyer_id,
       booking_status: { in: ["PENDING", "CONFIRMED"] },
-      date: { gte: new Date() },
+      booking_date: { gte: new Date() },// Only fetch upcoming bookings
     },
-    orderBy: { date: "asc" },
+    orderBy: { booking_date: "desc" },
     take: 3,
   });
 
@@ -17,7 +17,7 @@ const getRecentCompletedBookings = (lawyer_id) =>
       lawyer_id,
       booking_status: "COMPLETED",
     },
-    orderBy: { date: "desc" },
+    orderBy: { booking_date: "desc" },
     take: 3,
   });
 

@@ -10,7 +10,7 @@ const {
 } = require("../controllers/documentController");
 
 // POST   /api/documents/upload
-router.post("/upload", upload.single("file"), uploadDocument);
+router.post("/upload/:booking_id", authenticate, upload.single("file"), uploadDocument);
 
 // GET    /api/documents?user_id=&booking_id=
 router.get("/", getDocuments);

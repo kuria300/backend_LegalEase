@@ -1,5 +1,17 @@
 const { db } = require("../config/db")
 
+
+const markVerified = (id) => {
+    return db.users.update({
+        where: { id },
+        data: { 
+            is_verified: true,
+            otp_hash: null,        // clear OTP at the same time
+            otp_expires_at: null
+        }
+    });
+};
+
 //Find user by email address
 const findByEmail = (email) => {
     return db.users.findUnique({where: {email},
@@ -89,4 +101,4 @@ const HardDeleteUser = (id) => {
     });
 };
 
-module.exports = {HardDeleteUser, clearOtp, saveOtp, updateUser, createUser, findByEmail, findById, findAllUsers};
+module.exports = {HardDeleteUser, clearOtp, saveOtp, updateUser, createUser, findByEmail, findById, findAllUsers, markVerified};
