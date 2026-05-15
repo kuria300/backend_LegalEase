@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../utils/uploader");
+// documentRoutes.js
+const { upload } = require("../utils/uploader");
 const {
   uploadDocument,
   getDocumentById,
