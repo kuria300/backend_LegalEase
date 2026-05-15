@@ -1,5 +1,6 @@
 require('dotenv').config()
 const nodemailer = require('nodemailer');
+const { gmail}=require('../config/emailConfig')
 
 //Generates a random 6-digit numeric otp
 const generateOtp = () => {
@@ -13,18 +14,18 @@ const otpExpiresAt = () => {
  
 //Handles connection to the email services
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
+  host: gmail.host,
+  port: gmail.port,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: gmail.user,
+    pass: gmail.password
   }
 });
 
 //
 const sendOtpEmail = async (to, otp) => {
   await transporter.sendMail({
-    from: `"LegalEase" <${process.env.EMAIL_FROM}>`,
+    from: `"LegalEase" <${gmail.user}>`,
     to,
     subject: "Your LegalEase verification code",
     text: `Your verification code is: ${otp}\n\nThis code expires in 3 minutes. Do not share it with anyone.`,
