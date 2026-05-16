@@ -5,6 +5,7 @@ const { upload, handleMulterError } = require('../middleware/fileUpload');
 const { checkMessageLimit } = require('../middleware/messageLimit');
 const { chatLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const { sanitizeInput, validateUserId } = require('../middleware/inputSanitization');
+const { authenticate }=require('../middleware/auth.middleware')
 
 // Route to send a chat message to the AI
 // chatLimiter - limits to 50 requests per 15 minutes per IP to prevent spamming
@@ -13,7 +14,8 @@ const { sanitizeInput, validateUserId } = require('../middleware/inputSanitizati
 // checkMessageLimit - limits guests to 4 messages before prompting to register
 // handleChatMessage - sends the message to OpenAI and returns the AI reply
 router.post(
-    '/message', 
+    '/message',
+    authenticate, 
     chatLimiter,
     sanitizeInput,
     validateUserId,
@@ -31,6 +33,7 @@ router.post(
 // uploadDocument - extracts text from the document and sends it to OpenAI for analysis
 router.post(
     '/upload-document',
+    authenticate,
     uploadLimiter,
     sanitizeInput,
     validateUserId,
@@ -45,6 +48,7 @@ router.post(
 // getChatHistory - fetches the last 50 chat messages for the user from the database
 router.get(
     '/history/:userId',
+    authenticate,
     validateUserId,
     chatController.getChatHistory
 );
@@ -54,6 +58,7 @@ router.get(
 // getDocumentHistory - fetches the last 20 document analyses for the user from the database
 router.get(
     '/documents/:userId',
+    authenticate,
     validateUserId,
     chatController.getDocumentHistory
 );
@@ -61,6 +66,7 @@ router.get(
 
 router.delete(
     '/history/:userId',
+    authenticate,
     validateUserId,
     chatController.clearHistory
 );
@@ -69,6 +75,7 @@ router.delete(
 // clearHistory - deletes all chat messages for the user from the database
 router.post(
     '/clear',
+    authenticate,
     validateUserId,
     chatController.clearHistory
 );

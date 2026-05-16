@@ -156,7 +156,7 @@ const updateBookingStatus = async (req, res, next) => {
       data: updatedBooking
     });
   } catch (err) {
-    next(err);
+    next(err.message);
   }
 };
 // delete booking
@@ -173,7 +173,7 @@ const deleteBooking = async (req, res, next)=>{
       message: "Booking deleted successfully"
     });
   } catch (err) {
-    next(err)
+    next(err.message)
   }
 }
 

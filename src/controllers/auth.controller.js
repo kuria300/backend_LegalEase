@@ -16,16 +16,13 @@ const register = async (req, res, next) => {
         const result = await authService.register(req.body);
         return res.status(201).json({ success: true, ...result});
     } catch (error) {
-        next(error);
+        next(error.message);
     }
 };
 
 const login = async (req, res, next) => {
     try {
         const result = await authService.login(req.body);
-
-        //setting the token as a cookie
-        res.cookie('token', result.token, COOKIE_OPTIONS);
 
         return res.status(200).json({ success: true, ...result});
     } catch (error) {
@@ -56,7 +53,7 @@ const verifyEmail = async (req, res, next) => {
         const result = await authService.verifyEmail(req.body);
         return res.status(200).json({ success: true, ...result });
     } catch (error) {
-        next(error);
+        next(error.message);
     }
 };
  
@@ -68,21 +65,14 @@ const verifyOtp = async (req, res, next) => {
         // JWT goes into cookie only — never exposed in response body
         res.cookie('token', result.token, COOKIE_OPTIONS);
 
-        // return role so frontend knows which dashboard to redirect to
-        const dashboardMap = {
-            CLIENT: '/dashboard/user',
-            LAWYER: '/dashboard/lawyer',
-            ADMIN:  '/dashboard/admin',
-        };
-
+        // return role
         return res.status(200).json({
             success:   true,
             message:   "Logged in successfully.",
-            role:      result.role,
-            redirect:  dashboardMap[result.role] || '/dashboard/user'
+            role:      result.role
         });
     } catch (error) {
-        next(error);
+        next(error.message);
     }
 };
  

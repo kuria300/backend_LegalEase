@@ -26,6 +26,8 @@ const cookieParser = require('cookie-parser')
 const authRoutes = require('./src/routes/auth.routes')
 const getStatus = require('./src/routes/payStatus')
 
+const documentRoutes = require('./src/routes/documentRoutes')
+
 process.env.TZ= TZ
 
 BigInt.prototype.toJSON = function () {
@@ -69,23 +71,18 @@ if(cluster.isPrimary){
     }))
 
     // routes
-    const documentRoutes = require('./src/routes/documentRoutes')
     app.use('/api/documents', documentRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/api/dashboard', dashboardRoutes)
     app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
-    app.use('/api/chat', chatRoutes)
     app.use('/api/admin',adminRoutes);
-    app.use("/api/bookings", bookingRoutes);
     app.use ('/api/lawyer', lawyerRoutes)
 
     app.use("/api/bookings", bookingRoutes);
-    app.use ("/api/lawyers", lawyerMarketplaceRoutes);
+    app.use("/api/lawyers", lawyerMarketplaceRoutes);
 
-    app.use('/api/chat', chatRoutes)
     app.use('/api/admin', adminRoutes)
     app.use('/api/bookings', bookingRoutes)
-    app.use('/api/lawyers', lawyerMarketplaceRoutes)
     app.use('/api/user', userRoutes)
     app.use('/api/auth', authRoutes)
     app.use('/api/lawyerProfile', lawyerProfile)

@@ -5,6 +5,7 @@ const { hashValue, compareValue }            = require('../utils/hash.utils');
 const { signToken }                          = require('../utils/jwt.utils');
 const { generateOtp, otpExpiresAt, sendOtpEmail } = require('../utils/otp.utils');
 const { db }                                 = require('../config/db');
+const ErrorResponse=require('../utils/ErrorObj')
 
 //Rate limiting store (in-memory, per email)
 const loginAttempts = new Map();
@@ -35,7 +36,7 @@ const clearFailedAttempts = (email) => {
 
 // ── Register 
 // Creates user + password in a transaction, then sends OTP
-const register = async ({ first_name, second_name, email, password, dob }) => {
+const register = async ({ first_name, second_name, email, password,role, dob }) => {
     const existing = await userRepo.findByEmail(email);
     if (existing) {
         const error = new Error("An account with this email already exists.");
@@ -46,7 +47,7 @@ const register = async ({ first_name, second_name, email, password, dob }) => {
     // atomic: both user and password created or neither
     const user = await db.$transaction(async (tx) => {
         const newUser = await tx.users.create({
-            data: { first_name, second_name, email, dob: new Date(dob) }
+            data: { first_name, second_name, email, role, dob: new Date(dob) }
         });
         const hashedPassword = await hashValue(password);
         await tx.passwords.create({

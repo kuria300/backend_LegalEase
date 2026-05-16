@@ -7,7 +7,7 @@ const getAllUsers = async (req, res, next) => {
     return res.status(200).json({ success: true, data: users });
 
   } catch (error) {
-    next(error)
+   next(error.message)
     };
   }
 
@@ -17,7 +17,7 @@ const getUserById = async (req, res,next) => {
     const user = await userService.getUserById(req.params.id);
     return res.status(200).json({ success: true, data: user });
   } catch (error) {
-    next(error);
+   next(error.message);
     }
   }
 
@@ -27,7 +27,7 @@ const deleteMe = async (req, res, next) => {
     const result = await userService.deleteUser(req.user.userId);
     return res.status(200).json({ success: true, ...result });
   } catch (error) {
-    next(error);
+   next(error.message);
   }
 };
 //returns the logged in user's profile
@@ -40,7 +40,7 @@ const getMe = async ( req, res, next) => {
             data:user
         });
     } catch (error) {
-      next(error);  
+     next(error.message);  
     }
 };
 
