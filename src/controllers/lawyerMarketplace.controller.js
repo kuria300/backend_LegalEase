@@ -3,6 +3,7 @@ const ErrorResponse = require("../utils/ErrorObj");
 const {
   getAllLawyers,
   getLawyerById,
+  getLawyerByName,
 } = require("../repositories/lawyerMarketplace.repository");
 
 
@@ -19,15 +20,17 @@ module.exports.fetchAllLawyers = async (req, res, next) => {
 
   } catch (error) {
     console.error("LE-204 Error:", error);
-    next(error);
+    next(error.message);
   }
 };
-
+// TODO GET LAWYER BY NAME 
 
 // GET SINGLE LAWYER
 module.exports.fetchLawyerById = async (req, res, next) => {
   try {
-    const lawyerId= req.params.id
+
+    const lawyerId = req.params.id;
+
     const lawyer = await getLawyerById(lawyerId);
 
     if (!lawyer) {
@@ -37,6 +40,33 @@ module.exports.fetchLawyerById = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: lawyer,
+    });
+
+  } catch (error) {
+    console.error("LE-204 Error:", error);
+    next(error.message);
+  }
+};
+
+
+// GET LAWYER BY NAME
+module.exports.fetchLawyerByName = async (req, res, next) => {
+  try {
+
+    const { name } = req.params;
+
+    const lawyers = await getLawyerByName(name);
+
+    if (!lawyers || lawyers.length === 0) {
+      return next(
+        new ErrorResponse("No lawyer found with that name", 404)
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      count: lawyers.length,
+      data: lawyers,
     });
 
   } catch (error) {

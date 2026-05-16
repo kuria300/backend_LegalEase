@@ -30,7 +30,13 @@ const registerSchema = Joi.object({
         'date.max': 'Date of birth cannot be in the future',
         'any.required': 'Date of birth is required'
     }),
-});
+    role: Joi.string().valid('CLIENT', 'LAWYER').required().messages({
+            'any.only': 'Role must be CLIENT, or LAWYER',
+            'any.required': 'Role is required'
+    })
+})
+
+//TODO application_id
 
 const loginSchema = Joi.object({
     email:    Joi.string().email().required().messages({
@@ -42,6 +48,8 @@ const loginSchema = Joi.object({
     }),
 });
 
+
+
 const otpSchema = Joi.object({
     email: Joi.string().email().required(),
     otp:   Joi.string().length(6).pattern(/^[0-9]+$/).required().messages({
@@ -50,4 +58,12 @@ const otpSchema = Joi.object({
     }),
 });
 
-module.exports = { validate, registerSchema, loginSchema, otpSchema };
+const lawyerApplicationSchema = Joi.object({
+    lsk_number: Joi.string().min(3).required().messages({
+        'string.empty': 'LSK number is required',
+        'string.min': 'LSK number must be at least 3 characters',
+        'any.required': 'LSK number is required'
+    }),
+});
+
+module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema };

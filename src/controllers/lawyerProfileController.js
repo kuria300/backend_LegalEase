@@ -19,7 +19,7 @@ module.exports.editLawyerProfile = async (req, res, next) => {
     );
 
     if (!updatedProfile) {
-      throw new ErrorResponse("Lawyer profile not found", 404);
+      return next(new ErrorResponse("Lawyer profile not found", 404))
     }
 
     res.status(200).json({
@@ -32,11 +32,11 @@ module.exports.editLawyerProfile = async (req, res, next) => {
 
     console.error("LE-205 Error:", error);
 
-    next(error);
+    next(error.message);
   }
 };
 
-
+// ADMIN ROUTE -
 // UPDATE LAWYER ACTIVE STATUS
 module.exports.changeLawyerStatus = async (req, res, next) => {
 

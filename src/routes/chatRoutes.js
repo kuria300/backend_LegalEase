@@ -5,7 +5,7 @@ const { upload, handleMulterError } = require('../middleware/fileUpload');
 const { checkMessageLimit } = require('../middleware/messageLimit');
 const { chatLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const { sanitizeInput, validateUserId } = require('../middleware/inputSanitization');
-const { authenticate } = require('../midlleware/auth.middleware');
+const { authenticate } = require('../middleware/auth.middleware');
 
 // Public chat route - for homepage, no auth required
 // chatLimiter - limits to 50 requests per 15 minutes per IP to prevent spamming

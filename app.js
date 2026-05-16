@@ -26,6 +26,8 @@ const cookieParser = require('cookie-parser')
 const authRoutes = require('./src/routes/auth.routes')
 const getStatus = require('./src/routes/payStatus')
 
+const documentRoutes = require('./src/routes/documentRoutes')
+
 process.env.TZ= TZ
 
 BigInt.prototype.toJSON = function () {
@@ -75,7 +77,6 @@ if(cluster.isPrimary){
     });
 
     // routes
-    const documentRoutes = require('./src/routes/documentRoutes')
     app.use('/api/documents', documentRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/api/dashboard', dashboardRoutes)

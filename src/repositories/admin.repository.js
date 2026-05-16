@@ -17,7 +17,7 @@ const createLawyer = async (tx, data) => {
     data: {
       lawyer_application_id: data.lawyer_application_id,
       category: data.category,
-      phone_number: data.phone_number,
+      phone_number: data.phone_number || null,
       description: data.description,
       experience: data.experience,
       consultation_fee: data.consultation_fee,
