@@ -5,11 +5,11 @@ const { validate, registerSchema, loginSchema, otpSchema } = require('../middlew
 
 const router = Router();
 
-router.post('/register',   validate(registerSchema), authController.register);
-router.post('/verify-email', validate(otpSchema), authController.verifyEmail)
-router.post('/login',      validate(loginSchema),    authController.login);
-router.post('/send-otp',                             authController.sendOtp);
-router.post('/verify-otp', validate(otpSchema),      authController.verifyOtp);
-router.post('/logout',     authenticate,             authController.logout);
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.post("/send-otp", authController.sendOtp);
+router.post("/verify-otp", authController.verifyOtp);
+router.post("/forgot-password", authController.forgotPassword);
+router.post('/logout', authenticate, authController.logout);
 
 module.exports = router;

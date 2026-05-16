@@ -18,6 +18,7 @@
 const chatService = require('../services/chatService');
 const documentService = require('../services/documentService');
 const chatRepository = require('../repositories/chat.repository');
+const ErrorResponse = require('../utils/ErrorObj');
 
 //class for chat controller
 class ChatController {
@@ -76,7 +77,6 @@ class ChatController {
         try {
             // Get the uploaded file from the request
             const file = req.file;
-            const { userId } = req.body;
 
             // Check if a file was uploaded
             if (!file) throw new ErrorResponse('No file uploaded', 400);
@@ -84,12 +84,8 @@ class ChatController {
             // Send the file to documentService for analysis
             const result = await documentService.analyzeDocument(file);
 
-            // If user is logged in, save the document to the database via repository
-            if (userId) {
-                await chatRepository.saveDocument(userId, result.fileName);
-            }
-
-            // Send the analysis result back to the client
+            // Documents are tied to bookings in the DB so we don't save here
+            // The AI analysis is returned directly to the client
             res.json({ success: true, ...result });
         } catch (err) {
             next(err.message);
@@ -139,8 +135,8 @@ class ChatController {
     // async function to clear chat history for a logged in user
     async clearHistory(req, res, next) {
         try {
-            // Get userId from the request body
-            const { userId } = req.body;
+            // Get userId from request body or params to support both POST and DELETE requests
+            const userId = req.body ? req.body.userId : undefined || req.params.userId;
 
             // Check if userId is provided
             if (!userId) throw new ErrorResponse('User ID is required', 400);

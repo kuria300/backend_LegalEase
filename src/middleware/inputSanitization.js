@@ -7,7 +7,9 @@ const ErrorResponse = require('../utils/ErrorObj.js');
 // Middleware function to validate and sanitize user registration input I'll use requests, response, and next as parameters
 const sanitizeInput = (req, res, next) => {
     try {
-        const { message } = req.body;
+        // Check if req.body exists before destructuring to handle multipart/form-data requests
+        // where body is undefined until multer parses it
+        const message = req.body ? req.body.message : undefined;
 
         if (message) {
             if (message.length > 5000) {
