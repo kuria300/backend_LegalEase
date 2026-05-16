@@ -2,7 +2,7 @@
 
 const ErrorResponse = require('../utils/ErrorObj.js');
 
-const MESSAGE_LIMIT = 4;
+const MESSAGE_LIMIT = 2; // Set the message limit for guests (non-authenticated users)
 
 //The function takes in the request, response and next function as parameters and checks 
 // if the user has sent too many messages in a certain time frame. If they have, it returns an error response. If not, 
@@ -23,7 +23,7 @@ const checkMessageLimit = (req, res, next) => {
         // Increment the message count for the session
         req.session.messageCount += 1;
 
-        // Check if the message count exceeds the limit (e.g., 5 messages)
+        // Check if the message count exceeds the limit (e.g., 2 messages)
         if (req.session.messageCount > MESSAGE_LIMIT) {
             throw new ErrorResponse(`You have reached ${MESSAGE_LIMIT} message limit. Please register or login to continue.`, 403); // Throw an error if the limit is exceeded
         }

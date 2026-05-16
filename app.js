@@ -9,7 +9,7 @@ const ErrorResponse = require('./src/utils/ErrorObj')
 // Chat routes and OpenAI connection test
 const chatRoutes = require('./src/routes/chatRoutes')
 const { testConnection } = require('./src/config/openai')
-// // Dashboard and admin routes
+// Dashboard and admin routes
 const dashboardRoutes = require('./src/routes/dashboardRoutes')
 const lawyerDashboardRoutes = require('./src/routes/lawyerDashboardRoutes')
 const adminRoutes = require('./src/routes/adminRoutes')
@@ -19,7 +19,7 @@ const bookingRoutes = require("./src/routes/booking.routes");
 const lawyerRoutes = require('./src/routes/lawyerRoutes')
 const lawyerMarketplaceRoutes = require("./src/routes/lawyerMarketplace.routes");
 const lawyerProfile = require('./src/routes/lawyerProfileRoutes')
-// // M-Pesa payment routes
+// M-Pesa payment routes
 const getCallBack= require('./src/routes/callbackRoute')
 const getCheckout = require('./src/routes/checkoutRoute')
 const cookieParser = require('cookie-parser')
@@ -69,40 +69,40 @@ if(cluster.isPrimary){
         saveUninitialized: true,
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
+
+    // Debug logger - logs every incoming request method and URL
     app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
-    next();
-      });
+        console.log(`${req.method} ${req.url}`);
+        next();
+    });
+
     // routes
     app.use('/api/documents', documentRoutes)
     app.use('/api/chat', chatRoutes)
     app.use('/api/dashboard', dashboardRoutes)
     app.use('/api/lawyer-dashboard', lawyerDashboardRoutes)
-    app.use('/api/admin',adminRoutes);
-    app.use ('/api/lawyer', lawyerRoutes)
-
-    app.use("/api/bookings", bookingRoutes);
-    app.use("/api/lawyers", lawyerMarketplaceRoutes);
-
     app.use('/api/admin', adminRoutes)
     app.use('/api/bookings', bookingRoutes)
+    app.use('/api/lawyer', lawyerRoutes)
+    app.use('/api/lawyers', lawyerMarketplaceRoutes)
     app.use('/api/user', userRoutes)
     app.use('/api/auth', authRoutes)
     app.use('/api/lawyerProfile', lawyerProfile)
-    // mpeesa Routes
+
+    // M-Pesa Routes
     app.use('/payments/callback', getCallBack)
     app.use('/checkout', getCheckout)
     app.use('/check-status', getStatus)
-  
 
     // Health check route to verify the server is running, useful for monitoring and frontend connectivity checks
     app.get('/api/health', (req, res) => {
         res.json({ status: 'OK', message: 'LegalEase API running', timestamp: new Date().toISOString() });
     })
 
-    // ── Error handler (must be last)
+    // ── Error handler (must be last) ──────────────────────────
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
+
     app.listen(PORT, ()=>{
         console.log(`server running on port ${PORT}`)
     })
