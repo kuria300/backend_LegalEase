@@ -1,9 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { authenticate } = require("../middleware/auth.middleware");
-
-// documentRoutes.js
-const { upload } = require("../utils/uploader");
+const  { upload,uploadToMinio } = require("../utils/uploader");
+const { authenticate } = require("../middleware/auth.middleware")
 const {
   uploadDocument,
   getDocumentById,
@@ -12,7 +10,7 @@ const {
 } = require("../controllers/documentController");
 
 // POST   /api/documents/upload
-router.post("/upload/:booking_id", authenticate, upload.single("file"), uploadDocument);
+router.post("/upload/:booking_id", upload.single("file"), uploadDocument);
 
 // GET    /api/documents?user_id=&booking_id=
 router.get("/", getDocuments);

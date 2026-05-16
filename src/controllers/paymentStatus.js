@@ -40,7 +40,7 @@ const paymentStatus = async (req, res, next) => {
           await sleep(3000);
           continue;
         }
-        throw err;
+        next(err.message)
       }
     }
 

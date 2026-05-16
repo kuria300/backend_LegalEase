@@ -30,7 +30,13 @@ const registerSchema = Joi.object({
         'date.max': 'Date of birth cannot be in the future',
         'any.required': 'Date of birth is required'
     }),
-});
+    role: Joi.string().valid('CLIENT', 'LAWYER').required().messages({
+            'any.only': 'Role must be CLIENT, or LAWYER',
+            'any.required': 'Role is required'
+    })
+})
+
+//TODO application_id
 
 const loginSchema = Joi.object({
     email:    Joi.string().email().required().messages({
@@ -41,6 +47,8 @@ const loginSchema = Joi.object({
         'any.required': 'Password is required'
     }),
 });
+
+
 
 const otpSchema = Joi.object({
     email: Joi.string().email().required(),

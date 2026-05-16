@@ -35,7 +35,7 @@ const uploadDocument = async (req, res, next) => {
     if (error.code === "P2003") {
       return next(new ErrorResponse("Invalid user_id or booking_id", 404));
     }
-    next(error);
+    next(error.message);
   }
 };
 
@@ -50,7 +50,7 @@ const getDocumentById = async (req, res, next) => {
 
     res.status(200).json({ success: true, data: document });
   } catch (error) {
-    next(error);
+    next(error.message);
   }
 };
 
@@ -60,9 +60,7 @@ const getDocuments = async (req, res, next) => {
     const { user_id, booking_id } = req.query;
 
     if (!user_id && !booking_id) {
-      return next(
-        new ErrorResponse("Provide at least one query param: user_id or booking_id", 400)
-      );
+      return next(new ErrorResponse("Provide at least one query param: user_id or booking_id", 400));
     }
 
     const where = {};
@@ -73,7 +71,7 @@ const getDocuments = async (req, res, next) => {
 
     res.status(200).json({ success: true, count: documents.length, data: documents });
   } catch (error) {
-    next(error);
+    next(error.message);
   }
 };
 
@@ -98,7 +96,7 @@ const deleteDocumentHandler = async (req, res, next) => {
 
     res.status(200).json({ success: true, message: "Document deleted" });
   } catch (error) {
-    next(error);
+    next(error.message);
   }
 };
 

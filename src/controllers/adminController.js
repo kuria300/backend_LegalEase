@@ -25,14 +25,14 @@ module.exports.approveLawyer = async (req, res, next) => {
 
       // 2. CREATE LAWYER PROFILE (This will show APPROVAL)
       const newProfile = await createLawyer(tx, {
-   lawyer_application_id: application.id,
-   category: application.category,
-   phone_number: application.phone_number,
-   description: application.description,
-   experience: application.experience,
-   consultation_fee: application.consultation_fee,
-   is_active: true,
-});
+      lawyer_application_id: application.id,
+      category: application.category,
+      phone_number: application.phone_number || null,
+      description: application.description,
+      experience: application.experience,
+      consultation_fee: application.consultation_fee,
+      is_active: true,
+    });
       
 
       return {
@@ -49,6 +49,6 @@ module.exports.approveLawyer = async (req, res, next) => {
 
   } catch (error) {
     console.error("LE-203 Error:", error);
-    next(error);
+    next(error.message);
   }
 };
