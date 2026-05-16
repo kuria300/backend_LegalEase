@@ -18,7 +18,7 @@ const createBooking = async (data) => {
         // Check if a conflicting booking exists, if yes reject the request
         //return error message with status code (409)
         if (existingBooking) {
-            throw new ErrorResponse("The selected date is already booked for the selected lawyer.", 409);
+            throw new ErrorResponse("This slot is already booked for the selected lawyer.", 409);
         }
         // create the booking if no conflicts
         const booking = await db.bookings.create({
@@ -32,11 +32,14 @@ const createBooking = async (data) => {
                 booking_status: "PENDING"
             }
         });
+
         return booking;
+
     } catch (err) {
         throw err;
     }
 };
+
 // User booking routes
 
 const findBookingWithLawyerProfile = async(bookingId) => {
@@ -114,7 +117,9 @@ const getUserBookings = async (user_id, page, limit) => {
         const totalPages = Math.ceil(totalBookings / limit);
 
         return { bookings, totalBookings, totalPages, currentPage: page};
+
     } catch (err) {
+
         throw err;
     }
 };
@@ -131,6 +136,7 @@ const getLawyerBookings = async (lawyer_id, page, limit) => {
                 lawyer_id: lawyer_id
             }
         });
+
         const bookings = await db.bookings.findMany({
             where: {
                 lawyer_id: lawyer_id
@@ -163,6 +169,7 @@ const getLawyerBookings = async (lawyer_id, page, limit) => {
         const totalPages = Math.ceil(totalBookings / limit);
 
         return { bookings, totalBookings, totalPages, currentPage: page };
+
     } catch (err) {
         throw err;
     }
@@ -195,6 +202,7 @@ const getBookingById = async (booking_id)=>{
                 payments: true
             }    
         });
+
         if(!booking){
             return null
         }
@@ -204,21 +212,66 @@ const getBookingById = async (booking_id)=>{
     }
 };
 
-const updateBookingStatus = async(booking_id, booking_status) => {
+// function to reschedule a confirmed and paid booking to a new date and time
+const rescheduleBooking = async (booking_id, new_booking_date, new_booking_time) => {
     try {
-        const updatedBooking = await db.bookings.update({
+        // Get the lawyer_id from the existing booking
+        const existingBooking = await db.bookings.findUnique({
+            where: { id: booking_id },
+            select: { lawyer_id: true }
+        });
+
+        // Check for double booking at the new date and time
+        const conflictingBooking = await db.bookings.findFirst({
             where: {
+                // Same lawyer as the booking being rescheduled
+                lawyer_id: existingBooking.lawyer_id,
+                // New date
+                booking_date: new_booking_date,
+                // New time slot
+                booking_time: new_booking_time,
+                // Ignore cancelled bookings
+                booking_status: {
+                    notIn: ["CANCELLED"]
+                },
+                // Exclude the current booking from the check
+                NOT: {
+                    id: booking_id
+                }
+            }
+        });
+
+        // If a conflicting booking exists reject the request
+        if (conflictingBooking) {
+            throw new ErrorResponse(
+                "This time slot is already booked for the selected lawyer. Please select a different time slot.",
+                409
+            );
+        }
+
+        // Update the booking with the new date and time
+        const rescheduledBooking = await db.bookings.update({
+            where: {
+                // Target the specific booking by ID
                 id: booking_id
             },
             data: {
-                booking_status: booking_status
+                // Update to new booking date
+                booking_date: new_booking_date,
+                // Update to new booking time
+                booking_time: new_booking_time,
+                // Keep booking status as CONFIRMED after rescheduling
+                booking_status: "CONFIRMED"
             }
         });
-        return updatedBooking;
+
+        return rescheduledBooking;
+
     } catch (err) {
         throw err;
     }
 };
+
 // function to delete a booking by ID
 const deleteBooking = async(booking_id) =>{
     try {
@@ -233,48 +286,12 @@ const deleteBooking = async(booking_id) =>{
     }
 }
 
-// Function to update payment and booking status
-const updatePaymentBookingStatus = async (booking_status, payment_status, booking_id) => {
-    try {
-        //check if booking exists before updating
-        const existingBooking = await db.bookings.findUnique({
-            where: {
-                // find specific booking by ID
-                id: booking_id
-            }
-        });
-        // If booking not found, throw a 404 error
-        if(!existingBooking){
-            throw new ErrorResponse("Booking not found", 404)
-        }
-        //update both payment_status and booking_status
-        const updatedBooking = await db.bookings.update({
-            where: {
-                //update specific booking by ID
-                id: booking_id
-            },
-            data: {
-                //update payment status based on M-pesa webhook result
-                payment_status: payment_status,
-                // update booking status based on the payment status
-                booking_status: booking_status
-            }
-        });
-        return updatedBooking; 
-    } catch (err) {
-        throw err;
-    }
-}
-
-
-
 module.exports = { 
     createBooking, 
     getUserBookings, 
-    getLawyerBookings, 
+    getLawyerBookings,
+    rescheduleBooking, 
     getBookingById,
-    updateBookingStatus,
     deleteBooking,
-    updatePaymentBookingStatus,
     findBookingWithLawyerProfile
 };

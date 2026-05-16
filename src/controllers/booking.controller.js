@@ -2,7 +2,7 @@ const {
   createBookingService, 
   getUserBookingsService, 
   getLawyerBookingsService,
-  updateBookingStatusService,
+  rescheduleBookingService,
   deleteBookingService,
   getAvailableSlotsService 
 } = require("../services/booking.service");
@@ -12,7 +12,7 @@ const ErrorResponse = require("../utils/ErrorObj");
 const createBooking = async (req, res, next) => {
   try {
     // Extract booking details from request body
-    const { lawyer_id, booking_date, booking_time, notes } = req.body;
+    const { lawyer_id, booking_date, booking_time, notes, parsedDate } = req.body;
     // extract authenticated user_id from JWT token
     const user_id = req.user.userId;
     // Call the service layer with all required booking data
@@ -22,6 +22,7 @@ const createBooking = async (req, res, next) => {
       booking_date,
       booking_time,
       notes,
+      parsedDate
     });
     // return success response with the created booking
     return res.status(201).json({
@@ -136,29 +137,41 @@ const getUserBookingById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-}
-const updateBookingStatus = async (req, res, next) => {
-  try {
-    // extract booking id from url param
-    const { id } = req.params;
-    // Get the new status from the req body
-    const { booking_status } = req.body;
-    // Get authenticated user Id from JWT
-    const user_id = req.user.userId;
-
-    // Call service to validate & update the booking status
-    const updatedBooking = await updateBookingStatusService(id, booking_status, user_id);
-
-    // Return response with updated booking
-    return res.status(200).json({
-      success: true,
-      message: "Booking status updated successfully",
-      data: updatedBooking
-    });
-  } catch (err) {
-    next(err.message);
-  }
 };
+
+// reschedule a confirmed and paid booking
+const rescheduleBooking = async (req, res, next) => {
+    try {
+        // Get booking ID from URL parameter
+        const { id } = req.params;
+
+        // Get new date, time and parsedNewDate from request body
+        const { new_booking_date, new_booking_time, parsedNewDate } = req.body;
+
+        // Get authenticated user ID from JWT token
+        const user_id = req.user.userId;
+
+        // Call service to validate and reschedule the booking
+        const rescheduledBooking = await rescheduleBookingService(
+            id,
+            new_booking_date,
+            new_booking_time,
+            user_id,
+            parsedNewDate
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Booking rescheduled successfully",
+            data: rescheduledBooking
+        });
+
+    } catch (err) {
+        // Pass error to the global error handler middleware
+        next(err);
+    }
+};
+
 // delete booking
 const deleteBooking = async (req, res, next)=>{
   try {
@@ -184,6 +197,6 @@ module.exports = {
   getAvailableSlots,
   getLawyerBookings,
   getUserBookingById,
-  updateBookingStatus,
+  rescheduleBooking,
   deleteBooking
 };
