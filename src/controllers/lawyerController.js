@@ -2,7 +2,9 @@ const LawyerRepository = require("../repositories/lawyer.repository");
 const ErrorResponse = require("../utils/ErrorObj");
 
 const applyToBeLawyer = async (req, res, next) => {
-  const { user_id, file_url, lsk_number } = req.body;
+  const user_id= req.user.userId
+
+  const { file_url, lsk_number, description, consultation_fee, category, experience } = req.body;
 
   try {
     // check existing application

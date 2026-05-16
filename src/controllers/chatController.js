@@ -68,7 +68,7 @@ class ChatController {
             res.json(response);
         } catch (error) {
             // Pass any errors to the error handler middleware
-            next(error);
+            next(error.message);
         }
     }
 
@@ -88,7 +88,7 @@ class ChatController {
             // The AI analysis is returned directly to the client
             res.json({ success: true, ...result });
         } catch (err) {
-            next(err);
+            next(err.message);
         }
     }
 
@@ -108,7 +108,7 @@ class ChatController {
             // Send the conversations back to the client
             res.json({ success: true, conversations, count: conversations.length });
         } catch (err) {
-            next(err);
+            next(err.message);
         }
     }
 
@@ -128,7 +128,7 @@ class ChatController {
             // Send the document history back to the client
             res.json({ success: true, documents, count: documents.length });
         } catch (err) {
-            next(err);
+            next(err.message);
         }
     }
 
@@ -147,9 +147,24 @@ class ChatController {
             // Send a success response back to the client
             res.json({ success: true, message: 'Conversation cleared', conversationHistory: [] });
         } catch (err) {
-            next(err);
+            next(err.message);
         }
     }
+
+    async clearHistory(req, res, next) {
+    try {
+        const userId = req.body.userId || req.params.userId;
+
+        if (!userId) throw new ErrorResponse('User ID is required', 400);
+
+        await prisma.chatBot.deleteMany({ where: { user_id: userId } });
+
+        res.json({ success: true, message: 'Conversation cleared', conversationHistory: [] });
+    } catch (err) {
+        next(err.message);
+        }
+    }
+
 }
 
 module.exports = new ChatController();

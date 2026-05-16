@@ -1,4 +1,5 @@
 //ensure you have the OpenAI package installed and your API key set in the environment variables before using this code.
+require('dotenv').config()
 
 const OpenAI = require('openai');
 
