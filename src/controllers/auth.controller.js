@@ -47,15 +47,6 @@ const sendOtp = async (req, res,next) => {
   }
 };
 
-//For otp registration no cookie, no jwt
-const verifyEmail = async (req, res, next) => {
-    try {
-        const result = await authService.verifyEmail(req.body);
-        return res.status(200).json({ success: true, ...result });
-    } catch (error) {
-        next(error.message);
-    }
-};
  
 //Router to verify otp
 const verifyOtp = async (req, res, next) => {
@@ -72,7 +63,7 @@ const verifyOtp = async (req, res, next) => {
             role:      result.role
         });
     } catch (error) {
-        next(error.message);
+        next(error);
     }
 };
 const forgotPassword = async (req, res, next) => {

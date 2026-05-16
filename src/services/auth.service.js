@@ -7,31 +7,31 @@ const { generateOtp, otpExpiresAt, sendOtpEmail } = require('../utils/otp.utils'
 const { db }                                 = require('../config/db');
 const ErrorResponse=require('../utils/ErrorObj')
 
-//Rate limiting store (in-memory, per email)
-const loginAttempts = new Map();
-
-const checkRateLimit = (email) => {
-    const record = loginAttempts.get(email);
-    if (record?.lockedUntil && new Date() < new Date(record.lockedUntil)) {
-        const minutesLeft = Math.ceil((new Date(record.lockedUntil) - new Date()) / 60000);
-        const error = new Error(`Too many failed attempts. Try again in ${minutesLeft} minute(s).`);
-        error.statusCode = 429;
-        throw error;
+const checkRateLimit = (user) => {
+    if (user.locked_until && new Date() < new Date(user.locked_until)) {
+        const minutesLeft = Math.ceil(
+            (new Date(user.locked_until) - new Date()) / 60000
+        );
+        throw new ErrorResponse(
+            `Too many failed attempts. Try again in ${minutesLeft} minute(s).`,
+            429
+        );
     }
 };
 
-const recordFailedAttempt = (email) => {
-    const record = loginAttempts.get(email) || { count: 0, lockedUntil: null };
-    record.count += 1;
-    if (record.count >= 3) {
-        record.lockedUntil = new Date(Date.now() + 10 * 60 * 1000); // lock 10 min
-        record.count = 0;
+
+const recordFailedAttempt = async (user) => {
+    const attempts = user.login_attempts + 1;
+    if (attempts >= 3) {
+        await userRepo.lockAccount(user.id);
+    } else {
+        await userRepo.incrementLoginAttempts(user.id);
     }
-    loginAttempts.set(email, record);
 };
 
-const clearFailedAttempts = (email) => {
-    loginAttempts.delete(email);
+
+const clearFailedAttempts = async (userId) => {
+    await userRepo.clearLoginAttempts(userId);
 };
 
 // ── Register 
@@ -56,47 +56,36 @@ const register = async ({ first_name, second_name, email, password,role, dob }) 
         return newUser;
     });
 
-    // send OTP to verify email
-    const otp       = generateOtp();
-    const otpHash   = await hashValue(otp);
-    const otpExpiry = otpExpiresAt();
-    await userRepo.saveOtp(user.id, otpHash, otpExpiry);
-    await sendOtpEmail(email, otp);
-
-    return { message: "Account created. Check your email for the verification code." };
+    return { message: "Account created successfully. Please login" };
 };
 
 //Login 
 // Validates password, sends OTP — NO JWT yet
 const login = async ({ email, password }) => {
-    checkRateLimit(email);
-
+    // fetch user first — needed for rate limit check
     const user = await userRepo.findByEmail(email);
     if (!user) {
-        recordFailedAttempt(email);
-        const error = new Error("Invalid email or password.");
-        error.statusCode = 401;
-        throw error;
+        // can't record attempt without a user row — just throw
+        throw new ErrorResponse("Invalid email or password.", 401);
     }
+
+    // check lockout using user object
+    checkRateLimit(user);
 
     const passwordRow = await passwordRepo.findByUserId(user.id);
     if (!passwordRow) {
-        recordFailedAttempt(email);
-        const error = new Error("Invalid email or password.");
-        error.statusCode = 401;
-        throw error;
+        await recordFailedAttempt(user);
+        throw new ErrorResponse("Invalid email or password.", 401);
     }
 
     const isMatch = await compareValue(password, passwordRow.password);
     if (!isMatch) {
-        recordFailedAttempt(email);
-        const error = new Error("Invalid email or password.");
-        error.statusCode = 401;
-        throw error;
+        await recordFailedAttempt(user); 
+        throw new ErrorResponse("Invalid email or password.", 401);
     }
 
-    // password correct — reset failed attempts
-    clearFailedAttempts(email);
+    // password correct — clear attempts using userId
+    await clearFailedAttempts(user.id); 
 
     // send OTP for second factor
     const otp       = generateOtp();
@@ -113,10 +102,31 @@ const login = async ({ email, password }) => {
 const verifyOtp = async ({ email, otp }) => {
     const user = await userRepo.findByEmail(email);
     if (!user) {
-      throw new ErrorResponse("No account found with this email.", 404);
+        throw new ErrorResponse("No account found with this email.", 404);
     }
 
-}
+    if (!user.otp_hash || !user.otp_expires_at) {
+        throw new ErrorResponse("No OTP was requested for this account.", 400);
+    }
+
+    if (new Date() > new Date(user.otp_expires_at)) {
+        throw new ErrorResponse("This code has expired. Please request a new one.", 400);
+    }
+
+    const isValid = await compareValue(otp, user.otp_hash);
+    if (!isValid) {
+        throw new ErrorResponse("Incorrect verification code.", 400);
+    }
+
+    // clear OTP so it cannot be reused
+    await userRepo.clearOtp(user.id);
+
+    // generate JWT and return with role
+    const token = signToken({ userId: user.id, role: user.role });
+    return { token, role: user.role };
+};
+
+
 const forgotPassword = async ({ email, otp, newPassword, confirmPassword }) => {
     if (email && !otp && !newPassword) {
         const user = await userRepo.findByEmail(email);

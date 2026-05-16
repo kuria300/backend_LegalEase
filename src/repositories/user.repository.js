@@ -21,6 +21,8 @@ const findByEmail = (email) => {
             role:           true,
             otp_hash:       true,
             otp_expires_at: true,
+            login_attempts: true,
+            locked_until : true
         }
     });
 };
@@ -101,4 +103,44 @@ const HardDeleteUser = (id) => {
     });
 };
 
-module.exports = {HardDeleteUser, clearOtp, saveOtp, updateUser, createUser, findByEmail, findById, findAllUsers, markVerified};
+const incrementLoginAttempts = (id) => {
+    return db.users.update({
+        where: { id },
+        data: {
+            login_attempts: { increment: 1 }
+        }
+    });
+};
+
+const lockAccount = (id) => {
+    return db.users.update({
+        where: { id },
+        data: {
+            locked_until:   new Date(Date.now() + 10 * 60 * 1000),
+            login_attempts: 0
+        }
+    });
+};
+
+const clearLoginAttempts = (id) => {
+    return db.users.update({
+        where: { id },
+        data: {
+            login_attempts: 0,
+            locked_until:   null
+        }
+    });
+};
+
+module.exports = {HardDeleteUser,
+     clearOtp,
+      saveOtp,
+       updateUser,
+        createUser,
+         findByEmail,
+          findById,
+           findAllUsers,
+            markVerified,
+             lockAccount,
+              incrementLoginAttempts,
+               clearLoginAttempts};
