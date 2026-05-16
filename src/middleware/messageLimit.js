@@ -11,7 +11,9 @@ const MESSAGE_LIMIT = 4;
 const checkMessageLimit = (req, res, next) => {
     //I'll use try catch block to handle any errors that may occur during the execution of the function
     try {
-        const { userId } = req.body; // Get the user ID from the request body
+        // Check if req.body exists before destructuring to handle multipart/form-data requests
+        // where body is undefined until multer parses it
+        const userId = req.body ? req.body.userId : undefined; // Get the user ID from the request body
 
         if (userId) return next(); // If the user ID is present, continue processing the request
 

@@ -67,7 +67,10 @@ if(cluster.isPrimary){
         saveUninitialized: true,
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
-
+    app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+      });
     // routes
     const documentRoutes = require('./src/routes/documentRoutes')
     app.use('/api/documents', documentRoutes)
@@ -89,8 +92,7 @@ if(cluster.isPrimary){
     app.use('/api/user', userRoutes)
     app.use('/api/auth', authRoutes)
     app.use('/api/lawyerProfile', lawyerProfile)
-
-    // // mpeesa Routes
+    // mpeesa Routes
     app.use('/payments/callback', getCallBack)
     app.use('/checkout', getCheckout)
     app.use('/check-status', getStatus)
