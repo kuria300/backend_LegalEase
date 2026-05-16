@@ -68,15 +68,6 @@ const validateCreateBooking = (req, res, next) => {
             );
         }
 
-         //Restrict bookings between 8AM and 5PM
-        const bookingHour = parsedDate.getHours();
-        if (bookingHour < 8 || bookingHour >= 17) {
-        throw new ErrorResponse(
-            "Bookings are only allowed between 8AM and 5PM",
-            400,
-        );
-        }
-
         // Attach parsed date to request body for use in service
         parsedDate = req.body.parsedDate;
 
@@ -137,15 +128,6 @@ const validateRescheduleBooking = (req, res, next) => {
             );
         }
 
-        //Restrict bookings between 8AM and 5PM
-        const bookingHour = parsedDate.getHours();
-
-        if (bookingHour < 8 || bookingHour >= 17) {
-        throw new ErrorResponse(
-            "Bookings are only allowed between 8AM and 5PM",
-            400,
-        );
-        }
 
         // Attach parsed new date to request body for use in service
         req.body.parsedNewDate = parsedDate;
@@ -184,15 +166,10 @@ const validateGetSlots = (req, res, next) => {
                 400
             );
         }
-
-        //Restrict bookings between 8AM and 5PM
-        const bookingHour = parsedDate.getHours();
-        
-        if (bookingHour < 8 || bookingHour >= 17) {
-        throw new ErrorResponse(
-            "Bookings are only allowed between 8AM and 5PM",
-            400,
-        );
+        // Check new booking date is not in the past
+        const now = new Date();
+        if (parsedDate < now) {
+            throw new ErrorResponse("Booking date cannot be in the past", 400);
         }
 
         next();
