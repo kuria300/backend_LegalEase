@@ -50,4 +50,12 @@ const otpSchema = Joi.object({
     }),
 });
 
-module.exports = { validate, registerSchema, loginSchema, otpSchema };
+const lawyerApplicationSchema = Joi.object({
+    lsk_number: Joi.string().min(3).required().messages({
+        'string.empty': 'LSK number is required',
+        'string.min': 'LSK number must be at least 3 characters',
+        'any.required': 'LSK number is required'
+    }),
+});
+
+module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema };
