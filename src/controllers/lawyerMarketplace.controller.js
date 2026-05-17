@@ -3,7 +3,7 @@ const ErrorResponse = require("../utils/ErrorObj");
 const {
   getAllLawyers,
   getLawyerById,
-  getLawyerByName,
+  getLawyerByName
 } = require("../repositories/lawyerMarketplace.repository");
 
 
@@ -23,7 +23,6 @@ module.exports.fetchAllLawyers = async (req, res, next) => {
     next(error.message);
   }
 };
-// TODO GET LAWYER BY NAME 
 
 // GET SINGLE LAWYER
 module.exports.fetchLawyerById = async (req, res, next) => {
@@ -71,6 +70,6 @@ module.exports.fetchLawyerByName = async (req, res, next) => {
 
   } catch (error) {
     console.error("LE-204 Error:", error);
-    next(error);
+    next(error.message);
   }
 };

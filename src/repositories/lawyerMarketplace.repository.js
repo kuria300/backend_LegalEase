@@ -46,7 +46,50 @@ const getLawyerById = async (lawyerId) => {
   });
 };
 
+const getLawyerByName = async (name) => {
+  return await db.lawyer_profiles.findMany({
+    where: {
+      is_active: true,
+      lawyer_applications: {
+        users: {
+          OR: [
+            {
+              first_name: {
+                contains: name,
+                mode: "insensitive",
+              },
+            },
+            {
+              second_name: {
+                contains: name,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+      },
+    },
+
+    include: {
+      lawyer_applications: {
+        include: {
+          users: {
+            select: {
+              id: true,
+              first_name: true,
+              second_name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+
 module.exports = {
   getAllLawyers,
   getLawyerById,
+  getLawyerByName
 };

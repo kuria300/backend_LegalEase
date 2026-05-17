@@ -1,38 +1,12 @@
 require('dotenv').config();
 const userRepo     = require('../repositories/user.repository');
 const passwordRepo = require('../repositories/password.repository');
-const { hashValue, compareValue }            = require('../utils/hash.utils');
-const { signToken }                          = require('../utils/jwt.utils');
+const { hashValue, compareValue }= require('../utils/hash.utils');
+const { signToken }= require('../utils/jwt.utils');
 const { generateOtp, otpExpiresAt, sendOtpEmail } = require('../utils/otp.utils');
-const { db }                                 = require('../config/db');
+const { db }= require('../config/db');
 const ErrorResponse=require('../utils/ErrorObj')
 
-const checkRateLimit = (user) => {
-    if (user.locked_until && new Date() < new Date(user.locked_until)) {
-        const minutesLeft = Math.ceil(
-            (new Date(user.locked_until) - new Date()) / 60000
-        );
-        throw new ErrorResponse(
-            `Too many failed attempts. Try again in ${minutesLeft} minute(s).`,
-            429
-        );
-    }
-};
-
-
-const recordFailedAttempt = async (user) => {
-    const attempts = user.login_attempts + 1;
-    if (attempts >= 3) {
-        await userRepo.lockAccount(user.id);
-    } else {
-        await userRepo.incrementLoginAttempts(user.id);
-    }
-};
-
-
-const clearFailedAttempts = async (userId) => {
-    await userRepo.clearLoginAttempts(userId);
-};
 
 // ── Register 
 // Creates user + password in a transaction, then sends OTP
@@ -69,23 +43,15 @@ const login = async ({ email, password }) => {
         throw new ErrorResponse("Invalid email or password.", 401);
     }
 
-    // check lockout using user object
-    checkRateLimit(user);
-
     const passwordRow = await passwordRepo.findByUserId(user.id);
     if (!passwordRow) {
-        await recordFailedAttempt(user);
         throw new ErrorResponse("Invalid email or password.", 401);
     }
 
     const isMatch = await compareValue(password, passwordRow.password);
-    if (!isMatch) {
-        await recordFailedAttempt(user); 
+    if (!isMatch) { 
         throw new ErrorResponse("Invalid email or password.", 401);
     }
-
-    // password correct — clear attempts using userId
-    await clearFailedAttempts(user.id); 
 
     // send OTP for second factor
     const otp       = generateOtp();
@@ -128,6 +94,7 @@ const verifyOtp = async ({ email, otp }) => {
 
 
 const forgotPassword = async ({ email, otp, newPassword, confirmPassword }) => {
+
     if (email && !otp && !newPassword) {
         const user = await userRepo.findByEmail(email);
         if (!user) {
@@ -142,6 +109,7 @@ const forgotPassword = async ({ email, otp, newPassword, confirmPassword }) => {
 
         return { message: "If an account exists with this email, a reset code will be sent." };
     }
+    
 
     if (email && otp && newPassword) {
         console.log('forgotPassword called with:', { email, otp, newPassword, confirmPassword });

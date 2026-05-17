@@ -27,6 +27,7 @@ const authRoutes = require('./src/routes/auth.routes')
 const getStatus = require('./src/routes/payStatus')
 
 const documentRoutes = require('./src/routes/documentRoutes')
+const { checkMessageLimit } = require('./src/middleware/messageLimit')
 
 process.env.TZ= TZ
 
@@ -69,6 +70,8 @@ if(cluster.isPrimary){
         saveUninitialized: true,
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
+
+    app.use(checkMessageLimit)
 
     // Debug logger - logs every incoming request method and URL
     app.use((req, res, next) => {

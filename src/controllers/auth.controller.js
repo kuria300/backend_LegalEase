@@ -4,13 +4,12 @@ const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: false,
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 30 * 60 * 1000
 };
 
 
 //Registering new user
 //POST/register
-
 const register = async (req, res, next) => {
     try {
         const result = await authService.register(req.body);
