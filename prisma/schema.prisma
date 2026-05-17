@@ -110,8 +110,6 @@ model users {
   deleted_at                         DateTime?
   otp_hash                           String?              @db.VarChar(255)
   otp_expires_at                     DateTime?            @db.Timestamp(6)
-  login_attempts                     Int?                 @default(0)
-  locked_until                       DateTime?            @db.Timestamp(6)
   bookings_bookings_lawyer_idTousers bookings[]           @relation("bookings_lawyer_idTousers")
   bookings_bookings_user_idTousers   bookings[]           @relation("bookings_user_idTousers")
   chatbots                           chatbots[]

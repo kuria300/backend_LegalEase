@@ -66,4 +66,13 @@ const lawyerApplicationSchema = Joi.object({
     }),
 });
 
-module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema };
+const phoneValidationSchema = Joi.object({
+    phoneNumber: Joi.string().trim().required().pattern(/^(?:\+?254|0)(7|1)\d{8}$/).messages({
+            'string.empty': 'Phone number is required',
+            'any.required': 'Phone number is required',
+            'string.pattern.base': 'Please provide a valid Kenyan phone number(e.g. 0768863372 or 254768863372)'
+        })
+});
+
+
+module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema, phoneValidationSchema };
