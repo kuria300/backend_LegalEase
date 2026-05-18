@@ -1,15 +1,17 @@
 const { db } = require("../config/db");
 const ErrorResponse = require("../utils/ErrorObj");
 
-const createBooking = async (data) => {
+const createBooking = async ({ user_id, lawyer_id, booking_date, booking_time, notes }) => {
     try {
         // Check for double booking -> same date/time
         // Ignore cancelled bookings
+        console.log("Service received booking_date:", booking_date); 
+
         const existingBooking = await db.bookings.findFirst({
             where: {
-                lawyer_id: data.lawyer_id,
-                booking_date: data.booking_date,
-                booking_time: data.booking_time,
+                lawyer_id: lawyer_id,
+                booking_date: new Date(booking_date),
+                booking_time: booking_time,
                 booking_status: {
                     notIn: ["CANCELLED"]
                 }
@@ -23,11 +25,11 @@ const createBooking = async (data) => {
         // create the booking if no conflicts
         const booking = await db.bookings.create({
             data: {
-                user_id: data.user_id,
-                lawyer_id: data.lawyer_id,
-                booking_date: data.booking_date,
-                booking_time: data.booking_time,
-                notes: data.notes,
+                user_id: user_id,
+                lawyer_id: lawyer_id,
+                booking_date: new Date(booking_date),
+                booking_time: booking_time,
+                notes: notes,
                 payment_status: "PENDING",
                 booking_status: "PENDING"
             }

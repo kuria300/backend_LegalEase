@@ -1,6 +1,7 @@
 const express = require('express')
 const session = require('express-session')
 const cluster = require('node:cluster')
+const cors = require('cors');
 const os = require('os')
 const process = require('node:process')
 const { PORT, TZ , numLessCpus} = require('./src/config/appConfig')
@@ -57,6 +58,12 @@ if(cluster.isPrimary){
 }else{
 
     const app= express()
+    
+    // TODO update later to our frontend origin
+    const corsOptions={
+      origin: ["http://localhost:5173", "http://127.0.0.1:5173"]
+    }
+    app.use(cors(corsOptions))
 
     app.use(express.json());
     app.use(express.urlencoded({extended: true}))
@@ -102,7 +109,7 @@ if(cluster.isPrimary){
         res.json({ status: 'OK', message: 'LegalEase API running', timestamp: new Date().toISOString() });
     })
 
-    // ── Error handler (must be last) ──────────────────────────
+    //Error handler (must be last)
     app.use((req, res, next) => next(new ErrorResponse('Route not found', 404)))
     app.use(errorHandler)
 

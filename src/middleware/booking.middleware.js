@@ -69,7 +69,7 @@ const validateCreateBooking = (req, res, next) => {
         }
 
         // Attach parsed date to request body for use in service
-        parsedDate = req.body.parsedDate;
+        req.parsedDate = req.body.parsedDate;
 
         next();
 

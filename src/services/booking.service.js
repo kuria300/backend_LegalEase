@@ -38,8 +38,8 @@ const createBookingService = async (data) => {
     const booking = await createBooking({
       user_id,
       lawyer_id,
-      booking_date: parsedDate,
-      booking_time: booking_date,
+      booking_date: booking_date,
+      booking_time: booking_time,
       notes,
     });
 
