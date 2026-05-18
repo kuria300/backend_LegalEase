@@ -12,6 +12,7 @@ const ErrorResponse = require("../utils/ErrorObj");
 const createBooking = async (req, res, next) => {
   try {
     // Extract booking details from request body
+  
     const { lawyer_id, booking_date, booking_time, notes, parsedDate } = req.body;
     // extract authenticated user_id from JWT token
     const user_id = req.user.userId;
@@ -31,7 +32,7 @@ const createBooking = async (req, res, next) => {
       data: booking,
     });
   } catch (err) {
-    next(err);
+    next(err.message);
   }
 };
 
@@ -168,7 +169,7 @@ const rescheduleBooking = async (req, res, next) => {
 
     } catch (err) {
         // Pass error to the global error handler middleware
-        next(err);
+        next(err.message);
     }
 };
 
@@ -186,7 +187,7 @@ const deleteBooking = async (req, res, next)=>{
       message: "Booking deleted successfully"
     });
   } catch (err) {
-    next(err.message)
+    next(err)
   }
 }
 

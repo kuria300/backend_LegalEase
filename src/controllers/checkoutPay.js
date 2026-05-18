@@ -16,6 +16,14 @@ const paymentBook = async (req, res, next) => {
     if (!booking) {
       throw new ErrorResponse("Booking Not Found", 404);
     }
+
+      let formattedPhone = phoneNumber.trim();
+
+      if (formattedPhone.startsWith('0')) {
+          formattedPhone = '254' + formattedPhone.substring(1);
+      } else if (formattedPhone.startsWith('+')) {
+          formattedPhone = formattedPhone.substring(1);
+      }
     
     //get amount from lawyer_profile
     const amount =booking?.users_bookings_lawyer_idTousers?.lawyer_applications?.lawyer_profiles?.consultation_fee;
@@ -32,7 +40,7 @@ const paymentBook = async (req, res, next) => {
       payment = await db.payments.update({
         where: { id: existing.id },
         data: {
-          number: String(phoneNumber),
+          number: String(formattedPhone),
           amount,
         },
       });
@@ -42,12 +50,12 @@ const paymentBook = async (req, res, next) => {
     if (!existing || existing.status === "FAILED") {
       payment = await createPayment({
         bookingId: booking_id,
-        phoneNumber,
+        phoneNumber: formattedPhone,
         amount,
       });
     }
     // initaiate payment
-    const stkResponse = await stkPush(token, phoneNumber, amount);
+    const stkResponse = await stkPush({token:token, phoneNumber: formattedPhone, amount: amount});
 
     console.log(stkResponse)
 
