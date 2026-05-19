@@ -17,7 +17,8 @@ const VALID_SLOTS = [
 const VALID_STATUSES = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"];
 
 // Valid meeting types enums
-const VALID_MEETING_TYPES = ["Google Meet", "Phone Call", "In-Person"]
+const VALID_MEETING_TYPES = ["Google Meet", "Phone Call", "In-Person"];
+
 // Middleware to validate create booking request body
 const validateCreateBooking = (req, res, next) => {
     try {
@@ -53,18 +54,15 @@ const validateCreateBooking = (req, res, next) => {
         const [hours, minutes] = booking_time.split(":").map(Number);
 
         // Combine date and time
-        parsedDate.setHours(hours);
-        parsedDate.setMinutes(minutes);
+        parsedDate.setHours(0);
+        parsedDate.setMinutes(0);
         parsedDate.setSeconds(0);
         parsedDate.setMilliseconds(0);
 
         // Check booking date is not in the past
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const dateOnly = new Date(booking_date);
-        dateOnly.setHours(0, 0, 0, 0);
 
-        if (dateOnly < now) {
+        if (parsedDate < now) {
             throw new ErrorResponse("Booking date cannot be in the past", 400);
         }
         const day = parsedDate.getDay();
@@ -76,7 +74,7 @@ const validateCreateBooking = (req, res, next) => {
         }
 
         // Attach parsed date to request body for use in service
-        req.body.parsedDate = parsedDate;
+        req.parsedDate = req.body.parsedNewDate;
 
         next();
 
@@ -122,11 +120,8 @@ const validateRescheduleBooking = (req, res, next) => {
 
         // Check new booking date is not in the past
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const dateOnly = new Date(new_booking_date);
-        dateOnly.setHours(0, 0, 0, 0);
         
-        if (dateOnly < now) {
+        if (parsedDate < now) {
             throw new ErrorResponse("New booking date cannot be in the past", 400);
         }
 
@@ -138,7 +133,6 @@ const validateRescheduleBooking = (req, res, next) => {
                 400
             );
         }
-
 
         // Attach parsed new date to request body for use in service
         req.parsedDate = req.body.parsedNewDate;
@@ -179,9 +173,7 @@ const validateGetSlots = (req, res, next) => {
         }
         // Check new booking date is not in the past
         const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const dateOnly = new Date(booking_date);
-        dateOnly.setHours(0, 0, 0, 0);
+        
         if (parsedDate < now) {
             throw new ErrorResponse("Booking date cannot be in the past", 400);
         }

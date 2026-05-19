@@ -59,12 +59,8 @@ const createBookingService = async (data) => {
 const getAvailableSlotsService = async (lawyer_id, booking_date) => {
   try {
 
-    // Create start and end of day
-    const startOfDay = new Date(booking_date);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(booking_date)
-    endOfDay.setHours(23, 59, 59, 999);
+    // Parse and validate the date
+    const parsedDate = new Date(booking_date);
 
     // Fetch all booked slots for this lawyer on this date
     const bookedSlots = await db.bookings.findMany({
@@ -72,8 +68,8 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
         lawyer_id: lawyer_id,
         booking_date: {
           // Get all bookings for the same day
-          gte: startOfDay,
-          lt: endOfDay,
+          gte: new Date(parsedDate.setHours(0, 0, 0, 0)),
+          lt: new Date(parsedDate.setHours(23, 59, 59, 999))
         },
         // Ignore cancelled bookings
         booking_status: {
@@ -89,8 +85,8 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     // Extract booked time strings
     const bookedTimes = bookedSlots.map(b => {
       const time = new Date(b.booking_time);
-      const hh = String(time.getUTCHours()).padStart(2, "0");
-      const mm = String(time.getUTCMinutes()).padStart(2, "0");
+      const hh = String(time.getHours()).padStart(2, "0");
+      const mm = String(time.getMinutes()).padStart(2, "0");
       return `${hh}:${mm}`;
     });
 
@@ -99,7 +95,7 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    const requestedDate = new Date(booking_date);
+    const requestedDate = new Date(parsedDate);
     requestedDate.setHours(0,0,0,0);
 
     const isToday = requestedDate.getTime() === today.getTime();

@@ -5,14 +5,13 @@ const createBooking = async ({ user_id, lawyer_id, booking_date, booking_time, n
     try {
         // Check for double booking -> same date/time
         // Ignore cancelled bookings
-        // console.log("Service received booking_date:", booking_date); 
-        const bookingTime = new Date(`1970-01-01T${booking_time}:00.000Z`)
+        console.log("Service received booking_date:", booking_date); 
 
         const existingBooking = await db.bookings.findFirst({
             where: {
                 lawyer_id: lawyer_id,
                 booking_date: new Date(booking_date),
-                booking_time: bookingTime,
+                booking_time: booking_time,
                 booking_status: {
                     notIn: ["CANCELLED"]
                 }
@@ -29,7 +28,7 @@ const createBooking = async ({ user_id, lawyer_id, booking_date, booking_time, n
                 user_id: user_id,
                 lawyer_id: lawyer_id,
                 booking_date: new Date(booking_date),
-                booking_time: bookingTime,
+                booking_time: booking_time,
                 notes: notes,
                 meeting_type: meeting_type,
                 payment_status: "PENDING",

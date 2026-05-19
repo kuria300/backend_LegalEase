@@ -33,7 +33,7 @@ const createBooking = async (req, res, next) => {
       data: booking,
     });
   } catch (err) {
-    next(err);
+    next(err.message);
   }
 };
 
@@ -170,7 +170,7 @@ const rescheduleBooking = async (req, res, next) => {
 
     } catch (err) {
         // Pass error to the global error handler middleware
-        next(err);
+        next(err.message);
     }
 };
 
