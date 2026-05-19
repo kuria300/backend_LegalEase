@@ -14,7 +14,7 @@ const { VALID_SLOTS } = require("../middleware/booking.middleware")
 const createBookingService = async (data) => {
   try {
     // extract required fields from the incoming data
-    const { user_id, lawyer_id, booking_date, booking_time, notes, parsedDate } = data;
+    const { user_id, lawyer_id, booking_date, booking_time, notes, meeting_type, parsedDate } = data;
 
     // Verify the lawyer profile exists before booking
     const lawyerExists = await db.users.findFirst({
@@ -34,6 +34,12 @@ const createBookingService = async (data) => {
       throw new ErrorResponse("You cannot book yourself as a lawyer", 400);
     }
 
+    const meetingTypeMap = {
+    "Google Meet": "Google_Meet",
+    "Phone Call": "Phone_Call",
+    "In-Person": "In_Person"
+    };
+
     //pass validated data to the repository to create the booking
     const booking = await createBooking({
       user_id,
@@ -41,6 +47,7 @@ const createBookingService = async (data) => {
       booking_date: booking_date,
       booking_time: booking_time,
       notes,
+      meeting_type: meetingTypeMap[meeting_type] || "Google_Meet"
     });
 
     return booking;
