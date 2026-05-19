@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 // Logs the OTP to the console for debugging purposes
 // Catches and logs any errors that occur during sending
 const sendOtpEmail = async (to, otp) => {
-  console.log(`Sending OTP ${otp} to ${to}`);
+  console.log(`Sending OTP ${otp} to ${to} ${gmail.user}`);
   try {
     await transporter.sendMail({
       from: `"LegalEase" <${gmail.user}>`,

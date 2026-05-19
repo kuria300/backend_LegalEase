@@ -3,94 +3,18 @@ const {
   getUserBookings, 
   getLawyerBookings,
   getBookingById,
-  updateBookingStatus,
+  rescheduleBooking,
   deleteBooking
 } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
 const { db } = require("../config/db");
+const { VALID_SLOTS } = require("../middleware/booking.middleware")
 
-// Fixed 30-minute booking slots between 8AM and 5PM
-const VALID_SLOTS = [
-  "08:00", "08:30",
-  "09:00", "09:30",
-  "10:00", "10:30",
-  "11:00", "11:30",
-  "12:00", "12:30",
-  "13:00", "13:30",
-  "14:00", "14:30",
-  "15:00", "15:30",
-  "16:00", "16:30",
-];
-
+// create a new booking
 const createBookingService = async (data) => {
   try {
     // extract required fields from the incoming data
-    const { user_id, lawyer_id, booking_date, booking_time, notes } = data;
-
-    //check if primary fields are present before proceeding.
-    if (!lawyer_id || !booking_date || !booking_time) {
-      throw new ErrorResponse(
-        "Lawyer ID, booking date, and booking time are required",
-        400,
-      );
-    }
-
-    // Validate booking time to restrict custom slots
-    if(!VALID_SLOTS.includes(booking_time)){
-      throw new ErrorResponse("Invalid booking time. Select one of the available slots.", 400)
-    }
-
-    //Otherwise -> parse and validate the date
-    const parsedDate = new Date(booking_date);
-    const timestamp = parsedDate.getTime();
-    if (isNaN(timestamp)) {
-      throw new ErrorResponse("Invalid date format provided", 400);
-    }
-
-    //Split hours and minutes
-    const [hours, minutes] = booking_time.split(":").map(Number);
-
-    const isValidTime =
-      Number.isInteger(hours) &&
-      Number.isInteger(minutes) &&
-      hours >= 0 &&
-      hours <= 23 &&
-      minutes >= 0 &&
-      minutes <= 59;
-
-    if (!isValidTime) {
-      throw new ErrorResponse("Invalid booking time.", 400);
-    }
-    // combine date and time
-    parsedDate.setHours(hours);
-    parsedDate.setMinutes(minutes);
-    parsedDate.setSeconds(0);
-    parsedDate.setMilliseconds(0);
-
-    // Check to ensure booking date is not in the past
-    const now = new Date();
-    if (parsedDate < now) {
-      throw new ErrorResponse("Booking date cannot be in the past.", 400);
-    }
-
-    // restrict bookings to monday -> friday
-    const day = parsedDate.getDay();
-    // sunday = 0, saturday = 6
-    if (day === 0 || day === 6) {
-      throw new ErrorResponse(
-        "Bookings are only available from Monday - Friday",
-        400,
-      );
-    }
-
-    //Restrict bookings between 8AM and 5PM
-    const bookingHour = parsedDate.getHours();
-    if (bookingHour < 8 || bookingHour >= 17) {
-      throw new ErrorResponse(
-        "Bookings are only allowed between 8AM and 5PM",
-        400,
-      );
-    }
+    const { user_id, lawyer_id, booking_date, booking_time, notes, parsedDate } = data;
 
     // Verify the lawyer profile exists before booking
     const lawyerExists = await db.users.findFirst({
@@ -99,21 +23,26 @@ const createBookingService = async (data) => {
         role: "LAWYER",
       },
     });
+
+    // check if lawyer exists
     if (!lawyerExists) {
       throw new ErrorResponse("Lawyer not found", 404);
     }
+
     // Prevent lawyer from booking themselves
-    if (user_id === lawyerExists.lawyer_application_id) {
+    if (user_id === lawyer_id) {
       throw new ErrorResponse("You cannot book yourself as a lawyer", 400);
     }
+
     //pass validated data to the repository to create the booking
     const booking = await createBooking({
       user_id,
       lawyer_id,
-      booking_date: parsedDate,
-      booking_time: booking_date,
+      booking_date: booking_date,
+      booking_time: booking_time,
       notes,
     });
+
     return booking;
   } catch (err) {
     throw err;
@@ -122,25 +51,9 @@ const createBookingService = async (data) => {
 // Export available slots -> to be displayed in the frontend
 const getAvailableSlotsService = async (lawyer_id, booking_date) => {
   try {
-    // Ensure required fields are present
-    if (!lawyer_id || !booking_date) {
-      throw new ErrorResponse("Lawyer ID and booking date are required", 400);
-    }
 
     // Parse and validate the date
     const parsedDate = new Date(booking_date);
-    if (isNaN(parsedDate.getTime())) {
-      throw new ErrorResponse("Invalid date format provided", 400);
-    }
-
-    // Restrict to Monday - Friday
-    const day = parsedDate.getDay();
-    if (day === 0 || day === 6) {
-      throw new ErrorResponse(
-        "Bookings are only available from Monday - Friday",
-        400,
-      );
-    }
 
     // Fetch all booked slots for this lawyer on this date
     const bookedSlots = await db.bookings.findMany({
@@ -175,25 +88,24 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    const requestedDateOnly = new Date(parsedDate);
-    requestedDateOnly.setHours(0,0,0,0);
+    const requestedDate = new Date(parsedDate);
+    requestedDate.setHours(0,0,0,0);
 
-    const isToday = requestedDateOnly.getTime() === today.getTime();
-
-    if(requestedDateOnly < today){
-      throw new ErrorResponse("Cannot fetch slots for past date", 400);
-    }
-
+    const isToday = requestedDate.getTime() === today.getTime();
+    
     // Filter out booked slots from all valid slots
     const availableSlots = VALID_SLOTS.filter((slot)=> {
-      if(!isToday) return true;
+      if(!isToday){
+          return true;
+      } 
 
       const [hours, minutes] = slot.split(":").map(Number);
 
       const slotTime = new Date();
       slotTime.setHours(hours, minutes, 0, 0);
 
-      return slotTime > now
+      // Only return future slots 
+      return slotTime > now;
     }).map(slot => ({
       time: slot,
       // Mark each slot as available or booked
@@ -258,54 +170,61 @@ const getLawyerBookingsService = async (lawyer_id, page, limit) => {
     throw err;
   }
 }
-// -> valid booking enums
-const ENUMS = ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"];
+// Reschedule a confirmed and paid booking
+const rescheduleBookingService = async (booking_id, new_booking_date, new_booking_time, user_id, parsedNewDate) => {
+    try {
+        // Check if the booking exists
+        const existingBooking = await getBookingById(booking_id);
+        if (!existingBooking) {
+            throw new ErrorResponse("Booking not found", 404);
+        }
 
-const updateBookingStatusService = async (booking_id, booking_status, user_id) => {
-  try {
-    // check availability of booking_id
-    if(!booking_id){
-      throw new ErrorResponse("Booking Id is required", 400);
+        // Ensure the booking belongs to the authenticated user
+        if (existingBooking.user_id !== user_id) {
+            throw new ErrorResponse(
+                "You are not authorized to reschedule this booking",
+                403
+            );
+        }
+
+        // Only allow rescheduling of CONFIRMED and PAID bookings
+        if (
+            existingBooking.booking_status !== "CONFIRMED" ||
+            existingBooking.payment_status !== "PAID"
+        ) {
+            throw new ErrorResponse(
+                "Only confirmed and paid bookings can be rescheduled",
+                400
+            );
+        }
+
+        // Ensure new date and time are different from the current ones
+        const isSameDate =
+            new Date(existingBooking.booking_date).toDateString() ===
+            parsedNewDate.toDateString();
+        const isSameTime = existingBooking.booking_time === new_booking_time;
+
+        if (isSameDate && isSameTime) {
+            throw new ErrorResponse(
+                "New booking date and time must be different from the current booking",
+                400
+            );
+        }
+
+        // Call repository to reschedule the booking
+        const rescheduledBooking = await rescheduleBooking(
+            booking_id,
+            parsedNewDate,
+            new_booking_time
+        );
+
+        return rescheduledBooking;
+
+    } catch (err) {
+        throw err;
     }
-    // ensure booking status if provided
-    if(!booking_status){
-      throw new ErrorResponse("Booking status is required", 400);
-    }
-
-    // validate the provided status against allowed enums
-    if(!ENUMS.includes(booking_status)){
-      throw new ErrorResponse(`Invalid status. Must be one of: ${ENUMS.join(", ")}`, 400);
-    }
-
-    // check if the booking exists
-    const existingBooking = await getBookingById(booking_id);
-    if(!existingBooking){
-      throw new ErrorResponse("Booking not found", 404)
-    }
-
-    // Ensure the booking belongs to the authenticated user
-    if(existingBooking.user_id !== user_id){
-      throw new ErrorResponse("You are not authorized to update this booking", 403);
-    }
-
-    // Prevent updates on cancelled bookings
-    if(existingBooking.booking_status === "CANCELLED"){
-      throw new ErrorResponse("Can't update. Booking already cancelled!", 400);
-    }
-
-    // Prevent updates on completed bookings
-    if(existingBooking.booking_status === "COMPLETED"){
-      throw new ErrorResponse("Can't update. Booking already completed!", 400);
-    }
-
-    // Update the booking status in the repository
-    const updatedBooking = await updateBookingStatus(booking_id, booking_status);
-    return updatedBooking;
-
-  } catch (err) {
-    throw err;
-  }
 };
+
 //delete booking by -> ID
 const deleteBookingService = async (booking_id, user_id)=>{
   try {
@@ -325,7 +244,7 @@ const deleteBookingService = async (booking_id, user_id)=>{
     if(
       existingBooking.booking_status === "CONFIRMED" &&
       existingBooking.payment_status === "PAID"){
-        throw new ErrorResponse("Cannot delete a booking that has already been paid and confirmed", 400)
+        throw new ErrorResponse("Booking already confirmed. Kindly reschedule instead", 400)
       }
       // call delete booking from the repository
       const deletedBooking = await deleteBooking(booking_id);
@@ -341,7 +260,7 @@ module.exports = {
   createBookingService, 
   getUserBookingsService, 
   getLawyerBookingsService,
-  updateBookingStatusService,
+  rescheduleBookingService,
   deleteBookingService,
   getAvailableSlotsService
 };

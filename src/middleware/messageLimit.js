@@ -20,8 +20,6 @@ const checkMessageLimit = (req, res, next) => {
         if (!req.session.messageCount) {
             req.session.messageCount = 0; // Initialize message count if it doesn't exist
         }
-        // Increment the message count for the session
-        req.session.messageCount += 1;
 
         // Check if the message count exceeds the limit (e.g., 2 messages)
         if (req.session.messageCount >= MESSAGE_LIMIT) {

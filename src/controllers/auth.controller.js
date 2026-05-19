@@ -4,13 +4,12 @@ const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: false,
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 30 * 60 * 1000
 };
 
 
 //Registering new user
 //POST/register
-
 const register = async (req, res, next) => {
     try {
         const result = await authService.register(req.body);
@@ -47,15 +46,6 @@ const sendOtp = async (req, res,next) => {
   }
 };
 
-//For otp registration no cookie, no jwt
-const verifyEmail = async (req, res, next) => {
-    try {
-        const result = await authService.verifyEmail(req.body);
-        return res.status(200).json({ success: true, ...result });
-    } catch (error) {
-        next(error.message);
-    }
-};
  
 //Router to verify otp
 const verifyOtp = async (req, res, next) => {
@@ -72,7 +62,7 @@ const verifyOtp = async (req, res, next) => {
             role:      result.role
         });
     } catch (error) {
-        next(error.message);
+        next(error);
     }
 };
 const forgotPassword = async (req, res, next) => {

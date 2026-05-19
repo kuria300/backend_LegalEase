@@ -5,7 +5,6 @@ const markVerified = (id) => {
     return db.users.update({
         where: { id },
         data: { 
-            is_verified: true,
             otp_hash: null,        // clear OTP at the same time
             otp_expires_at: null
         }
@@ -20,7 +19,7 @@ const findByEmail = (email) => {
             email:          true,
             role:           true,
             otp_hash:       true,
-            otp_expires_at: true,
+            otp_expires_at: true
         }
     });
 };
@@ -101,4 +100,12 @@ const HardDeleteUser = (id) => {
     });
 };
 
-module.exports = {HardDeleteUser, clearOtp, saveOtp, updateUser, createUser, findByEmail, findById, findAllUsers, markVerified};
+module.exports = {HardDeleteUser,
+     clearOtp,
+      saveOtp,
+       updateUser,
+        createUser,
+         findByEmail,
+          findById,
+           findAllUsers,
+            markVerified};

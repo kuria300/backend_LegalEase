@@ -25,8 +25,11 @@ class ChatController {
     //async function to handle chat messages
     async handleChatMessage(req, res, next) {
         try {
+            // let userId = id ?req.cookies?.guest_id : req.user.userId
             // Extract message, conversation history and userId from the request body
-            const { message, conversationHistory = [], userId } = req.body;
+            const { message, conversationHistory = [], userId} = req.body;
+
+            console.log(userId)
 
             // Check if message is empty and return 400 if so
             if (!message || message.trim() === '') {
@@ -68,7 +71,7 @@ class ChatController {
             res.json(response);
         } catch (error) {
             // Pass any errors to the error handler middleware
-            next(error.message);
+            next(error);
         }
     }
 
