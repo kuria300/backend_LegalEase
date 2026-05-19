@@ -14,7 +14,7 @@ const { VALID_SLOTS } = require("../middleware/booking.middleware")
 const createBookingService = async (data) => {
   try {
     // extract required fields from the incoming data
-    const { user_id, lawyer_id, booking_date, booking_time, notes, parsedDate } = data;
+    const { user_id, lawyer_id, booking_date, booking_time, notes, meeting_type, parsedDate } = data;
 
     // Verify the lawyer profile exists before booking
     const lawyerExists = await db.users.findFirst({
@@ -34,6 +34,12 @@ const createBookingService = async (data) => {
       throw new ErrorResponse("You cannot book yourself as a lawyer", 400);
     }
 
+    const meetingTypeMap = {
+    "Google Meet": "Google_Meet",
+    "Phone Call": "Phone_Call",
+    "In-Person": "In_Person"
+    };
+
     //pass validated data to the repository to create the booking
     const booking = await createBooking({
       user_id,
@@ -41,6 +47,7 @@ const createBookingService = async (data) => {
       booking_date: booking_date,
       booking_time: booking_time,
       notes,
+      meeting_type: meetingTypeMap[meeting_type] || "Google_Meet"
     });
 
     return booking;
@@ -52,8 +59,12 @@ const createBookingService = async (data) => {
 const getAvailableSlotsService = async (lawyer_id, booking_date) => {
   try {
 
-    // Parse and validate the date
-    const parsedDate = new Date(booking_date);
+    // Create start and end of day
+    const startOfDay = new Date(booking_date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(booking_date)
+    endOfDay.setHours(23, 59, 59, 999);
 
     // Fetch all booked slots for this lawyer on this date
     const bookedSlots = await db.bookings.findMany({
@@ -61,8 +72,8 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
         lawyer_id: lawyer_id,
         booking_date: {
           // Get all bookings for the same day
-          gte: new Date(parsedDate.setHours(0, 0, 0, 0)),
-          lt: new Date(parsedDate.setHours(23, 59, 59, 999))
+          gte: startOfDay,
+          lt: endOfDay,
         },
         // Ignore cancelled bookings
         booking_status: {
@@ -78,8 +89,8 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     // Extract booked time strings
     const bookedTimes = bookedSlots.map(b => {
       const time = new Date(b.booking_time);
-      const hh = String(time.getHours()).padStart(2, "0");
-      const mm = String(time.getMinutes()).padStart(2, "0");
+      const hh = String(time.getUTCHours()).padStart(2, "0");
+      const mm = String(time.getUTCMinutes()).padStart(2, "0");
       return `${hh}:${mm}`;
     });
 
@@ -88,7 +99,7 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    const requestedDate = new Date(parsedDate);
+    const requestedDate = new Date(booking_date);
     requestedDate.setHours(0,0,0,0);
 
     const isToday = requestedDate.getTime() === today.getTime();

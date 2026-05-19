@@ -13,7 +13,7 @@ const createBooking = async (req, res, next) => {
   try {
     // Extract booking details from request body
   
-    const { lawyer_id, booking_date, booking_time, notes, parsedDate } = req.body;
+    const { lawyer_id, booking_date, booking_time, notes, meeting_type, parsedDate } = req.body;
     // extract authenticated user_id from JWT token
     const user_id = req.user.userId;
     // Call the service layer with all required booking data
@@ -23,6 +23,7 @@ const createBooking = async (req, res, next) => {
       booking_date,
       booking_time,
       notes,
+      meeting_type,
       parsedDate
     });
     // return success response with the created booking
@@ -32,7 +33,7 @@ const createBooking = async (req, res, next) => {
       data: booking,
     });
   } catch (err) {
-    next(err.message);
+    next(err);
   }
 };
 
@@ -169,7 +170,7 @@ const rescheduleBooking = async (req, res, next) => {
 
     } catch (err) {
         // Pass error to the global error handler middleware
-        next(err.message);
+        next(err);
     }
 };
 
