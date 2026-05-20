@@ -7,7 +7,11 @@ const ErrorResponse = require("../utils/ErrorObj");
 //on success , attaches decoded payload to req.user on failure, returns 401
 const authenticate = (req, res, next) => {
 
-    let token = req.cookies?.token;
+    let token = req.headers.authorization
+
+    if(token && token.startsWith('Bearer ')){
+        token = token.split(' ')[1]
+    }
 
     if (!token) {
         return next(new ErrorResponse('Access denied.No token provided', 401))

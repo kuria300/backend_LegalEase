@@ -94,7 +94,7 @@ const verifyOtp = async ({ email, otp }) => {
     await userRepo.clearOtp(user.id);
 
     // generate JWT and return with role
-    const token = signToken({ userId: user.id, role: user.role });
+    const token = signToken({ userId: user.id, role: user.role, email: user.email, name: user.first_name });
     return { token, role: user.role };
 };
 

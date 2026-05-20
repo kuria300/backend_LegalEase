@@ -223,13 +223,23 @@ const rescheduleBookingService = async (booking_id, new_booking_date, new_bookin
                 400
             );
         }
+                  const convertTimeToDate = (timeStr) => {
+              const [hours, minutes] = timeStr.split(":").map(Number);
+
+              const date = new Date();
+              date.setHours(hours, minutes, 0, 0);
+
+              return date;
+          };
+
+           const bookingTimeDate = convertTimeToDate(new_booking_time);
 
         // Call repository to reschedule the booking
-        const rescheduledBooking = await rescheduleBooking(
+        const rescheduledBooking = await rescheduleBooking({
             booking_id,
-            parsedNewDate,
-            new_booking_time
-        );
+            new_booking_date:parsedNewDate,
+            new_booking_time: bookingTimeDate
+       });
 
         return rescheduledBooking;
 

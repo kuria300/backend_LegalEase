@@ -216,7 +216,7 @@ const getBookingById = async (booking_id)=>{
 };
 
 // function to reschedule a confirmed and paid booking to a new date and time
-const rescheduleBooking = async (booking_id, new_booking_date, new_booking_time) => {
+const rescheduleBooking = async ({booking_id, new_booking_date, new_booking_time}) => {
     try {
         // Get the lawyer_id from the existing booking
         const existingBooking = await db.bookings.findUnique({
