@@ -64,6 +64,11 @@ const lawyerApplicationSchema = Joi.object({
         'string.min': 'LSK number must be at least 3 characters',
         'any.required': 'LSK number is required'
     }),
+    file_url: Joi.string().uri().required().messages({
+        'string.empty': 'File URL is required',
+        'any.required': 'File URL is required'
+    })
+
 });
 
 const phoneValidationSchema = Joi.object({

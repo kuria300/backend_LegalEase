@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const {applyToBeLawyer}= require('../controllers/lawyerController');
-const{validate,lawyerApplicationSchema} = require('../middleware/validate.middleware');
+const { applyToBeLawyer } = require('../controllers/lawyerController');
+const { validate, lawyerApplicationSchema } = require('../middleware/validate.middleware');
+const { authenticate, authorise } = require('../middleware/auth.middleware');
 
-router.post("/", validate(lawyerApplicationSchema),applyToBeLawyer);
-const {authenticate, authorise}=require('../middleware/auth.middleware')
+// Combines authentication, authorization, payload validation, and names the path properly!
+router.post("/apply", authenticate, validate(lawyerApplicationSchema), applyToBeLawyer);
 
-router.post("/",authenticate, authorise('LAWYER'),applyToBeLawyer);
 console.log("LAWYER ROUTES FILE LOADED");
 
 module.exports = router;

@@ -1,9 +1,7 @@
-require('dotenv').config()
+const { defineConfig } = require('@prisma/config');
 
-
-module.exports = {
-  schema: "prisma/schema.prisma",
-  datasource: {
-    url: process.env.DATABASE_URL,
+module.exports = defineConfig({
+  migrations: {
+    seed: 'node ./prisma/seed.js', // 👈 Tells Prisma exactly where your admin seed file is
   },
-};
+});
