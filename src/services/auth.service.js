@@ -60,7 +60,13 @@ const login = async ({ email, password }) => {
     await userRepo.saveOtp(user.id, otpHash, otpExpiry);
     await sendOtpEmail(email, otp);
 
-    return { message: "Password verified. Check your email for the verification code." };
+    return { message: "Password verified. Check your email for the verification code.", 
+             data: {
+                id: user.id,
+                email: user.email,
+                name: user.first_name,
+                role: user.role
+             }};
 };
 
 // ── Verify OTP

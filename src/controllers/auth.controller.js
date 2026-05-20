@@ -74,4 +74,11 @@ const forgotPassword = async (req, res, next) => {
     }
 };
 
-module.exports = { login, register, logout, sendOtp, verifyOtp, forgotPassword };
+const getUser = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    user: req.user
+  });
+};
+
+module.exports = { login, register, logout, sendOtp, verifyOtp, forgotPassword, getUser };

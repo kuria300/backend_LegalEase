@@ -61,7 +61,8 @@ if(cluster.isPrimary){
     
     // TODO update later to our frontend origin
     const corsOptions={
-      origin: ["http://localhost:5173", "http://127.0.0.1:5173"]
+      origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+      credentials: true
     }
     app.use(cors(corsOptions))
 
@@ -78,7 +79,7 @@ if(cluster.isPrimary){
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
 
-    app.use(checkMessageLimit)
+    //app.use(checkMessageLimit)
 
     // Debug logger - logs every incoming request method and URL
     app.use((req, res, next) => {
