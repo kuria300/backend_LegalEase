@@ -15,7 +15,7 @@ const register = async (req, res, next) => {
         const result = await authService.register(req.body);
         return res.status(201).json({ success: true, ...result});
     } catch (error) {
-        next(error.message);
+        next(error);
     }
 };
 
@@ -52,14 +52,14 @@ const verifyOtp = async (req, res, next) => {
     try {
         const result = await authService.verifyOtp(req.body);
 
-        // JWT goes into cookie only — never exposed in response body
-        res.cookie('token', result.token, COOKIE_OPTIONS);
-
         // return role
         return res.status(200).json({
             success:   true,
             message:   "Logged in successfully.",
-            role:      result.role
+            token: result.token,
+            role:      result.role,
+            email:     result.email,
+            name:      result.first_name
         });
     } catch (error) {
         next(error);
@@ -74,4 +74,11 @@ const forgotPassword = async (req, res, next) => {
     }
 };
 
-module.exports = { login, register, logout, sendOtp, verifyOtp, forgotPassword };
+const getUser = async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    user: req.user
+  });
+};
+
+module.exports = { login, register, logout, sendOtp, verifyOtp, forgotPassword, getUser };

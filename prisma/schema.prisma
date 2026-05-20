@@ -20,6 +20,7 @@ model bookings {
   user_id                         String         @db.Uuid
   lawyer_id                       String         @db.Uuid
   booking_time                    DateTime?      @db.Time(6)
+  meeting_type                    meeting_type   @default(Google_Meet)
   users_bookings_lawyer_idTousers users          @relation("bookings_lawyer_idTousers", fields: [lawyer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users_bookings_user_idTousers   users          @relation("bookings_user_idTousers", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   documents                       documents[]
@@ -148,4 +149,10 @@ enum payment_transaction_status {
   PENDING
   SUCCESS
   FAILED
+}
+
+enum meeting_type {
+  Google_Meet @map("Google Meet")
+  Phone_Call  @map("Phone Call")
+  In_Person   @map("In-Person")
 }

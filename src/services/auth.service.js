@@ -60,7 +60,13 @@ const login = async ({ email, password }) => {
     await userRepo.saveOtp(user.id, otpHash, otpExpiry);
     await sendOtpEmail(email, otp);
 
-    return { message: "Password verified. Check your email for the verification code." };
+    return { message: "Password verified. Check your email for the verification code.", 
+             data: {
+                id: user.id,
+                email: user.email,
+                name: user.first_name,
+                role: user.role
+             }};
 };
 
 // ── Verify OTP
@@ -88,7 +94,7 @@ const verifyOtp = async ({ email, otp }) => {
     await userRepo.clearOtp(user.id);
 
     // generate JWT and return with role
-    const token = signToken({ userId: user.id, role: user.role });
+    const token = signToken({ userId: user.id, role: user.role, email: user.email, name: user.first_name });
     return { token, role: user.role };
 };
 

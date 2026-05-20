@@ -9,11 +9,29 @@ const {
 const { getBookingById } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
 
+const formatDate = (date) => {
+    return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Africa/Nairobi",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).format(new Date(date));
+};
+
+const formatTime = (date) => {
+    return new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Africa/Nairobi",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    }).format(new Date(date));
+};
+
 const createBooking = async (req, res, next) => {
   try {
     // Extract booking details from request body
   
-    const { lawyer_id, booking_date, booking_time, notes, parsedDate } = req.body;
+    const { lawyer_id, booking_date, booking_time, notes, meeting_type, parsedDate } = req.body;
     // extract authenticated user_id from JWT token
     const user_id = req.user.userId;
     // Call the service layer with all required booking data
@@ -23,6 +41,7 @@ const createBooking = async (req, res, next) => {
       booking_date,
       booking_time,
       notes,
+      meeting_type,
       parsedDate
     });
     // return success response with the created booking
@@ -147,7 +166,7 @@ const rescheduleBooking = async (req, res, next) => {
         const { id } = req.params;
 
         // Get new date, time and parsedNewDate from request body
-        const { new_booking_date, new_booking_time, parsedNewDate } = req.body;
+        const { new_booking_date, new_booking_time, parsedNewDate} = req.body;
 
         // Get authenticated user ID from JWT token
         const user_id = req.user.userId;
@@ -164,12 +183,16 @@ const rescheduleBooking = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: "Booking rescheduled successfully",
-            data: rescheduledBooking
+            data: {
+              ...rescheduledBooking,
+              booking_date: formatDate(rescheduledBooking.booking_date),
+              booking_time: formatTime(rescheduledBooking.booking_time)
+            }
         });
 
     } catch (err) {
         // Pass error to the global error handler middleware
-        next(err.message);
+        next(err);
     }
 };
 

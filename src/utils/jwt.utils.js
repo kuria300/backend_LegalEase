@@ -2,7 +2,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 
-//Signs a JWT containing the user's id and role.
+//Signs a JWT containing the user's id and role plus username and email.
 const signToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,

@@ -14,7 +14,7 @@ const { VALID_SLOTS } = require("../middleware/booking.middleware")
 const createBookingService = async (data) => {
   try {
     // extract required fields from the incoming data
-    const { user_id, lawyer_id, booking_date, booking_time, notes, parsedDate } = data;
+    const { user_id, lawyer_id, booking_date, booking_time, notes, meeting_type, parsedDate } = data;
 
     // Verify the lawyer profile exists before booking
     const lawyerExists = await db.users.findFirst({
@@ -34,6 +34,12 @@ const createBookingService = async (data) => {
       throw new ErrorResponse("You cannot book yourself as a lawyer", 400);
     }
 
+    const meetingTypeMap = {
+    "Google Meet": "Google_Meet",
+    "Phone Call": "Phone_Call",
+    "In-Person": "In_Person"
+    };
+
     //pass validated data to the repository to create the booking
     const booking = await createBooking({
       user_id,
@@ -41,6 +47,7 @@ const createBookingService = async (data) => {
       booking_date: booking_date,
       booking_time: booking_time,
       notes,
+      meeting_type: meetingTypeMap[meeting_type] || "Google_Meet"
     });
 
     return booking;
@@ -55,14 +62,20 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     // Parse and validate the date
     const parsedDate = new Date(booking_date);
 
+    const startOfDay = new Date(parsedDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(parsedDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
     // Fetch all booked slots for this lawyer on this date
     const bookedSlots = await db.bookings.findMany({
       where: {
         lawyer_id: lawyer_id,
         booking_date: {
           // Get all bookings for the same day
-          gte: new Date(parsedDate.setHours(0, 0, 0, 0)),
-          lt: new Date(parsedDate.setHours(23, 59, 59, 999))
+          gte: startOfDay,
+          lt: endOfDay
         },
         // Ignore cancelled bookings
         booking_status: {
@@ -210,13 +223,23 @@ const rescheduleBookingService = async (booking_id, new_booking_date, new_bookin
                 400
             );
         }
+                  const convertTimeToDate = (timeStr) => {
+              const [hours, minutes] = timeStr.split(":").map(Number);
+
+              const date = new Date();
+              date.setHours(hours, minutes, 0, 0);
+
+              return date;
+          };
+
+           const bookingTimeDate = convertTimeToDate(new_booking_time);
 
         // Call repository to reschedule the booking
-        const rescheduledBooking = await rescheduleBooking(
+        const rescheduledBooking = await rescheduleBooking({
             booking_id,
-            parsedNewDate,
-            new_booking_time
-        );
+            new_booking_date:parsedNewDate,
+            new_booking_time: bookingTimeDate
+       });
 
         return rescheduledBooking;
 

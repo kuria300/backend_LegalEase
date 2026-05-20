@@ -1,7 +1,7 @@
 const { db } = require("../config/db");
 const ErrorResponse = require("../utils/ErrorObj");
 
-const createBooking = async ({ user_id, lawyer_id, booking_date, booking_time, notes }) => {
+const createBooking = async ({ user_id, lawyer_id, booking_date, booking_time, notes, meeting_type }) => {
     try {
         // Check for double booking -> same date/time
         // Ignore cancelled bookings
@@ -30,6 +30,7 @@ const createBooking = async ({ user_id, lawyer_id, booking_date, booking_time, n
                 booking_date: new Date(booking_date),
                 booking_time: booking_time,
                 notes: notes,
+                meeting_type: meeting_type,
                 payment_status: "PENDING",
                 booking_status: "PENDING"
             }
@@ -215,7 +216,7 @@ const getBookingById = async (booking_id)=>{
 };
 
 // function to reschedule a confirmed and paid booking to a new date and time
-const rescheduleBooking = async (booking_id, new_booking_date, new_booking_time) => {
+const rescheduleBooking = async ({booking_id, new_booking_date, new_booking_time}) => {
     try {
         // Get the lawyer_id from the existing booking
         const existingBooking = await db.bookings.findUnique({
