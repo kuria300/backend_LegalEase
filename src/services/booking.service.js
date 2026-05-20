@@ -62,14 +62,20 @@ const getAvailableSlotsService = async (lawyer_id, booking_date) => {
     // Parse and validate the date
     const parsedDate = new Date(booking_date);
 
+    const startOfDay = new Date(parsedDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(parsedDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
     // Fetch all booked slots for this lawyer on this date
     const bookedSlots = await db.bookings.findMany({
       where: {
         lawyer_id: lawyer_id,
         booking_date: {
           // Get all bookings for the same day
-          gte: new Date(parsedDate.setHours(0, 0, 0, 0)),
-          lt: new Date(parsedDate.setHours(23, 59, 59, 999))
+          gte: startOfDay,
+          lt: endOfDay
         },
         // Ignore cancelled bookings
         booking_status: {

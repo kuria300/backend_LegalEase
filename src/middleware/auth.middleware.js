@@ -9,14 +9,6 @@ const authenticate = (req, res, next) => {
 
     let token = req.cookies?.token;
 
-
-    if (!token) {
-        const authHeader = req.headers.authorization
-        if (authHeader?.startsWith('Bearer ')){
-            token = authHeader.split(' ')[1];
-        }
-    }
-
     if (!token) {
         return next(new ErrorResponse('Access denied.No token provided', 401))
     }

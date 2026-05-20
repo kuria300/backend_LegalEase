@@ -172,8 +172,9 @@ const validateGetSlots = (req, res, next) => {
             );
         }
         // Check new booking date is not in the past
+        parsedDate.setHours(0,0,0,0)
         const now = new Date();
-        
+        now.setHours(0, 0, 0, 0);
         if (parsedDate < now) {
             throw new ErrorResponse("Booking date cannot be in the past", 400);
         }
