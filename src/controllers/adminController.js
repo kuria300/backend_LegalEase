@@ -33,8 +33,7 @@ module.exports.approveLawyer = async (req, res, next) => {
       consultation_fee: application.consultation_fee,
       is_active: true,
     });
-      
-
+    
       return {
         newProfile,
       };

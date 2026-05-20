@@ -129,6 +129,7 @@ const validateRescheduleBooking = (req, res, next) => {
         }
 
 
+
         // Attach parsed new date to request body for use in service
         req.body.parsedNewDate = parsedDate;
 
