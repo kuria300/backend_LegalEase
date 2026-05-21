@@ -45,7 +45,7 @@ router.post(
 // uploadDocument - extracts text from the document and sends it to OpenAI for analysis
 router.post(
     '/upload-document',
-    authenticate,
+    //authenticate,
     uploadLimiter,
     upload.single('document'),
     handleMulterError,

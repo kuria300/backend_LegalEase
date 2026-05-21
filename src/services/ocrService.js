@@ -4,6 +4,7 @@
 
 const Tesseract = require('tesseract.js');
 const ErrorResponse = require('../utils/ErrorObj.js');
+const pdfParse = require('pdf-parse');
 
 // Function to perform OCR on an image and extract text
 // let me use a class to define the OCRService and its method for extracting text from an image
