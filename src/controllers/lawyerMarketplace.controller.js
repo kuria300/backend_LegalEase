@@ -20,7 +20,7 @@ module.exports.fetchAllLawyers = async (req, res, next) => {
 
   } catch (error) {
     console.error("LE-204 Error:", error);
-    next(error.message);
+    next(error);
   }
 };
 

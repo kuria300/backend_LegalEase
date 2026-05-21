@@ -59,6 +59,11 @@ const otpSchema = Joi.object({
 });
 
 const lawyerApplicationSchema = Joi.object({
+   ile_url: Joi.string().uri().required().messages({
+        'string.empty': 'File URL is required',
+        'any.required': 'File URL is required'
+    })
+
   lsk_number: Joi.string().min(3).required().messages({
     'string.empty': 'LSK number is required',
     'string.min': 'LSK number must be at least 3 characters',
