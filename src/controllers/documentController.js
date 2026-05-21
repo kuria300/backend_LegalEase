@@ -99,5 +99,18 @@ const deleteDocumentHandler = async (req, res, next) => {
     next(error.message);
   }
 };
+const uploadFile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(new ErrorResponse("No file received", 400))
+    }
 
-module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument: deleteDocumentHandler };
+    const file_url = await uploadToMinio(req)
+
+    res.status(200).json({ success: true, fileUrl: file_url })
+  } catch (error) {
+    next(error)
+  }
+}
+
+module.exports = { uploadDocument, getDocumentById, getDocuments, deleteDocument: deleteDocumentHandler, uploadFile };

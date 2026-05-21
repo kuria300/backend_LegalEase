@@ -4,13 +4,19 @@ const ErrorResponse = require("../utils/ErrorObj");
 const applyToBeLawyer = async (req, res, next) => {
   const user_id= req.user.userId
 
-  const { file_url, lsk_number, description, consultation_fee, category, experience } = req.body;
+  const { file_url, lsk_number, description, consultation_fee, category, experience, phone_number, profile_picture_url } = req.body;
 
   try {
     // check existing application
     const existingApp = await LawyerRepository.findExistingApplication(
       user_id,
-      lsk_number
+      lsk_number,
+      description,
+      consultation_fee,
+      category,
+      experience,
+      phone_number,
+      profile_picture_url,
     );
 
     if (existingApp) {
@@ -25,6 +31,12 @@ const applyToBeLawyer = async (req, res, next) => {
       user_id,
       file_url,
       lsk_number,
+      description,
+      consultation_fee,
+      category,
+      experience,
+      phone_number,
+      profile_picture_url,  
     });
 
     res.status(201).json({
