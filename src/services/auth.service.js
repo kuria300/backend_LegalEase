@@ -30,7 +30,7 @@ const register = async ({ first_name, second_name, email, password,role, dob }) 
         return newUser;
     });
 
-    return { message: "Account created successfully. Please login" };
+    return { message: "Account created successfully. Please login", userId: user.id };
 };
 
 //Login 
