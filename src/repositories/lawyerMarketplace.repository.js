@@ -9,10 +9,9 @@ const getAllLawyers = async () => {
     select: {
       id: true,
       category: true,         // Required for card sub-headers like "Family & Divorce Law"
-      experience: true,       //  Required for "12 Years Exp." badge
-      location: true,         //  Required for "Westlands" location label
+      experience: true,       //  Required for "12 Years Exp." badg         //  
       consultation_fee: true, //  Required for price tier display ($$, $$$)
-      bio: true,              //  Required for the profile about snippet
+      description: true,              //  Required for the profile about snippet
       lawyer_applications: {
         include: {
           users: {
@@ -39,11 +38,8 @@ const getLawyerById = async (lawyerId) => {
       id: true,
       category: true,
       experience: true,
-      location: true,
       consultation_fee: true,
-      bio: true,
-      education: true,        // Pulls University degree history for profile view
-      credentials: true,      // 👈Pulls LSK/High Court confirmation checkboxes
+      description: true,
       lawyer_applications: {
         include: {
           users: {
@@ -77,7 +73,6 @@ const getLawyerByName = async (name) => {
       id: true,
       category: true,
       experience: true,
-      location: true,
       consultation_fee: true,
       lawyer_applications: {
         include: {
