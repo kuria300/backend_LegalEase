@@ -13,7 +13,7 @@ const { testConnection } = require('./src/config/openai')
 // Dashboard and admin routes
 const dashboardRoutes = require('./src/routes/dashboardRoutes')
 const lawyerDashboardRoutes = require('./src/routes/lawyerDashboardRoutes')
-const adminRoutes = require('./src/routes/adminRoutes')
+const adminRoutes = require('./src/routes/admin.routes')
 // User, booking and lawyer routes
 const userRoutes = require('./src/routes/user.routes')
 const bookingRoutes = require("./src/routes/booking.routes");

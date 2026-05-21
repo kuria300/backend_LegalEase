@@ -7,6 +7,7 @@ const {
   getDocumentById,
   getDocuments,
   deleteDocument,
+  uploadFile,
 } = require("../controllers/documentController");
 
 // POST   /api/documents/upload
@@ -20,5 +21,7 @@ router.get("/:id", getDocumentById);
 
 // DELETE /api/documents/:id
 router.delete("/:id", deleteDocument);
+
+router.post("/upload-file", upload.single("document"), uploadFile)
 
 module.exports = router;

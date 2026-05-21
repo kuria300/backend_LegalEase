@@ -59,20 +59,34 @@ const otpSchema = Joi.object({
 });
 
 const lawyerApplicationSchema = Joi.object({
-    lsk_number: Joi.string().min(3).required().messages({
-        'string.empty': 'LSK number is required',
-        'string.min': 'LSK number must be at least 3 characters',
-        'any.required': 'LSK number is required'
-    }),
-});
+  lsk_number: Joi.string().min(3).required().messages({
+    'string.empty': 'LSK number is required',
+    'string.min': 'LSK number must be at least 3 characters',
+    'any.required': 'LSK number is required'
+  }),
+  category: Joi.string().required().messages({
+    'string.empty': 'Category is required',
+    'any.required': 'Category is required'
+  }),
+  consultation_fee: Joi.number().min(500).required().messages({
+    'number.min': 'Minimum fee is 500',
+    'any.required': 'Consultation fee is required'
+  }),
+  experience: Joi.number().min(0).max(60).required().messages({
+    'any.required': 'Years of experience is required'
+  }),
+  description: Joi.string().min(80).max(600).required().messages({
+    'string.min': 'Bio should be at least 80 characters',
+    'any.required': 'Bio is required'
+  }),
+  phone_number: Joi.string().required().messages({
+    'string.empty': 'Phone number is required',
+    'any.required': 'Phone number is required'
+  }),
+  file_url: Joi.string().allow(null, '').optional(),
+  profile_picture_url: Joi.string().allow(null, '').optional(),
+})
 
-const phoneValidationSchema = Joi.object({
-    phoneNumber: Joi.string().trim().required().pattern(/^(?:\+?254|0)(7|1)\d{8}$/).messages({
-            'string.empty': 'Phone number is required',
-            'any.required': 'Phone number is required',
-            'string.pattern.base': 'Please provide a valid Kenyan phone number(e.g. 0768863372 or 254768863372)'
-        })
-});
 
 
-module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema, phoneValidationSchema };
+module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema };
