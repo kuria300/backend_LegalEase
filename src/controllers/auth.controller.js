@@ -30,7 +30,6 @@ const login = async (req, res, next) => {
 };
 
 const logout = ( req, res) => { 
-    res.clearCookie('token', COOKIE_OPTIONS);
     return res.status(200).json({
         success: true,
         message: "Logged out successfully."
