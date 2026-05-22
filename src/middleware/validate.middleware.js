@@ -57,12 +57,19 @@ const otpSchema = Joi.object({
         'string.pattern.base': 'OTP must contain only numbers'
     }),
 });
+const phoneValidationSchema = Joi.object({
+  phoneNumber: Joi.string().trim().required().pattern(/^(?:\+?254|0)(7|1)\d{8}$/).messages({
+    'string.empty': 'Phone number is required',
+    'any.required': 'Phone number is required',
+    'string.pattern.base': 'Please provide a valid Kenyan phone number (e.g. 0768863372 or 254768863372)'
+  }),
+});
 
 const lawyerApplicationSchema = Joi.object({
    ile_url: Joi.string().uri().required().messages({
         'string.empty': 'File URL is required',
         'any.required': 'File URL is required'
-    })
+    }),
 
   lsk_number: Joi.string().min(3).required().messages({
     'string.empty': 'LSK number is required',
@@ -84,14 +91,11 @@ const lawyerApplicationSchema = Joi.object({
     'string.min': 'Bio should be at least 80 characters',
     'any.required': 'Bio is required'
   }),
-  phone_number: Joi.string().required().messages({
-    'string.empty': 'Phone number is required',
-    'any.required': 'Phone number is required'
-  }),
+ 
   file_url: Joi.string().allow(null, '').optional(),
   profile_picture_url: Joi.string().allow(null, '').optional(),
 })
 
 
 
-module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema };
+module.exports = { validate, registerSchema, loginSchema, otpSchema, lawyerApplicationSchema, phoneValidationSchema };

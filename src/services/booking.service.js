@@ -40,12 +40,21 @@ const createBookingService = async (data) => {
     "In-Person": "In_Person"
     };
 
+    const convertTimeToDate = (timeStr) => {
+        const [hours, minutes] = timeStr.split(":").map(Number);
+
+        const date = new Date();
+        date.setHours(hours, minutes, 0, 0);
+
+        return date;
+          };
+
     //pass validated data to the repository to create the booking
     const booking = await createBooking({
       user_id,
       lawyer_id,
       booking_date: booking_date,
-      booking_time: booking_time,
+      booking_time: convertTimeToDate(booking_time),
       notes,
       meeting_type: meetingTypeMap[meeting_type] || "Google_Meet"
     });
@@ -223,7 +232,7 @@ const rescheduleBookingService = async (booking_id, new_booking_date, new_bookin
                 400
             );
         }
-                  const convertTimeToDate = (timeStr) => {
+            const convertTimeToDate = (timeStr) => {
               const [hours, minutes] = timeStr.split(":").map(Number);
 
               const date = new Date();

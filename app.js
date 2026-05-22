@@ -78,7 +78,7 @@ if(cluster.isPrimary){
         cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
     }))
 
-    app.use(checkMessageLimit)
+    // app.use(checkMessageLimit)
 
     // Debug logger - logs every incoming request method and URL
     app.use((req, res, next) => {
