@@ -1,4 +1,5 @@
 const authService = require('../services/auth.service');
+const {db}=require('../config/db');
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -69,14 +70,17 @@ const forgotPassword = async (req, res, next) => {
         const result = await authService.forgotPassword(req.body);
         return res.status(200).json({ success: true, ...result });
     } catch (error) {
-        next(error);
+        next(error.message);
     }
 };
 
 const getUser = async (req, res) => {
+  const user = await db.users.findUnique({
+    where: { id: req.user.userId }
+  });
   return res.status(200).json({
     success: true,
-    user: req.user
+    user
   });
 };
 

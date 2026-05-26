@@ -1,6 +1,7 @@
 const AdminRepository = require("../repositories/admin.repository")
 const {sendApprovalEmail, sendRejectionEmail} = require("../utils/emails")
 const minioClient = require("../config/minio")
+const { rejectApplicationService}=require('../services/superadmin.service')
 
 const getApplications = async (req, res) => {
   try {
@@ -30,23 +31,34 @@ const getApplications = async (req, res) => {
 const getApplicationById = async (req, res) => {
   try {
     const { id } = req.params
-
     const app = await AdminRepository.findApplicationById(id)
-
     if (!app) return res.status(404).json({ error: "Application not found" })
 
-    // generate a presigned URL valid for 1 hour so the browser can access it
     let viewable_file_url = null
     if (app.file_url) {
+      let objectKey
 
-      const objectKey = app.file_url
-        .split(`${process.env.MINIO_BUCKET_NAME}/`)[1]
+      if (app.file_url.includes(`/${process.env.MINIO_BUCKET_NAME}/`)) {
+        objectKey = app.file_url.split(`/${process.env.MINIO_BUCKET_NAME}/`)[1]
 
-      viewable_file_url = await minioClient.presignedGetObject(
-        process.env.MINIO_BUCKET_NAME,
-        objectKey,
-        60 * 60 // 1 hour
-      )
+      //already just the object key like "uploads/file.pdf"
+      } else if (!app.file_url.startsWith("http")) {
+        objectKey = app.file_url
+
+      } else {
+        const url = new URL(app.file_url)
+        objectKey = url.pathname.split("/").slice(2).join("/")
+      }
+
+      if (!objectKey) {
+        console.error("Could not extract objectKey from file_url:", app.file_url)
+      } else {
+        viewable_file_url = await minioClient.presignedGetObject(
+          process.env.MINIO_BUCKET_NAME,
+          objectKey,
+          60 * 60
+        )
+      }
     }
 
     res.status(200).json({
@@ -60,7 +72,7 @@ const getApplicationById = async (req, res) => {
       file_url: viewable_file_url,
       is_active: app.lawyer_profiles?.is_active || false,
       user_name: `${app.users?.first_name} ${app.users?.second_name}`,
-      user_email: app.users?.email
+      user_email: app.users?.email,
     })
   } catch (error) {
     console.error("Error fetching application details:", error)
@@ -78,8 +90,8 @@ const approveApplication = async (req, res, next) => {
     await AdminRepository.verifyLawyer(id, app)
 
     sendApprovalEmail({
-      to: app.user_email,
-      name: app.user_name,
+      to: app.users.email,                                       
+      name: `${app.users.first_name} ${app.users.second_name}`,  
     }).catch((err) => console.error("Approval email failed:", err))
 
     res.status(200).json({ message: "Lawyer verified successfully" })
@@ -88,6 +100,35 @@ const approveApplication = async (req, res, next) => {
     res.status(500).json({ error: "Failed to verify lawyer" })
   }
 }
+
+
+const rejectApplication = async (req, res) => {
+  const { appId } = req.params
+
+  if (!appId) {
+    return res.status(400).json({ error: "Application ID is required." })
+  }
+
+  try {
+    const application = await AdminRepository.findApplicationById(appId)
+    if (!application) return res.status(404).json({ error: "Application not found." })
+
+    const { email, first_name, second_name } = application.users
+
+    const result = await rejectApplicationService(appId)
+
+    sendRejectionEmail({
+      to: email,
+      name: `${first_name} ${second_name}`,
+    }).catch((err) => console.error("Rejection email failed:", err))
+
+    return res.status(result.statusCode).json(result.body)
+  } catch (err) {
+    console.error("rejectApplication error:", err)
+    return res.status(500).json({ error: "Internal server error." })
+  }
+}
+
 
 const getAllUsers = async (req, res) => {
   try {
@@ -128,5 +169,6 @@ module.exports = {
   getApplicationById,
   approveApplication,
   getAllUsers,
-  revokeLawyer
+  revokeLawyer,
+  rejectApplication
 }

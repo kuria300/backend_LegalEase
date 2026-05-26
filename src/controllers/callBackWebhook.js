@@ -48,18 +48,17 @@ const callbackEndPoint = async (req,res, next)=>{
 
     // handle failed payment
     if(resultCode != 0){
-      console.log(resultCode)
+       console.log("STK FAILED:", {
+        resultCode,
+        resultDesc
+      });
         const data= await markPaymentFailedIfPending(payment.id)
 
-        if(data.count === 0){
-          console.log('end the second callback from changing bookings db')
-          return
+        if (data.count === 0) {
+          return res.json({ ResultCode: 0, ResultDesc: "Already handled" });
         }
 
-        return res.json({
-          ResultCode: 0,
-          ResultDesc: 'Received'
-        })
+        return res.json({ ResultCode: 0, ResultDesc: "Received" });
     }
 
         /*

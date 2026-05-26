@@ -3,7 +3,8 @@ const ErrorResponse = require("../utils/ErrorObj");
 const {
   getAllLawyers,
   getLawyerById,
-  getLawyerByName
+  getLawyerByName,
+  getLawyerByUserId
 } = require("../repositories/lawyerMarketplace.repository");
 
 
@@ -73,3 +74,21 @@ module.exports.fetchLawyerByName = async (req, res, next) => {
     next(error.message);
   }
 };
+
+
+module.exports.fetchLawyerByUserId = async(req, res, next) => {
+  try {
+    const userId = req.user.userId; // from JWT middleware
+ 
+    const profile = await getLawyerByUserId(userId)
+ 
+    if (!profile) {
+      return next(new ErrorResponse("Lawyer profile not found", 404));
+    }
+ 
+    return res.status(200).json({ success: true, data: profile });
+  } catch (err) {
+    next(err);
+  }
+
+}

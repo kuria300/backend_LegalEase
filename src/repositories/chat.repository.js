@@ -2,13 +2,13 @@ const { db: prisma } = require('../config/db.js');
 
 class ChatRepository {
     // Save a chat message and AI reply to the database for a logged in user
-    async saveMessage(userId, message, reply) {
+    async saveMessage(userId, message, reply, category = 'general') {
         return await prisma.chatbots.create({
             data: {
                 user_id: userId,
                 chat: message,
                 ai_response: reply,
-                category: 'general'
+                category: category
             }
         });
     }

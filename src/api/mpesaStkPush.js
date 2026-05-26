@@ -12,7 +12,10 @@ const url= mpesa.stkPushEndpoint
 const stkPush = async({token, phoneNumber, amount})=>{
 
     try {
-        const timestamp = dayjs().format("YYYYMMDDHHmmss");
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/[-T:\.Z]/g, "")
+            .slice(0, 14);
 
         const password = Buffer.from(
             `${shortcode}${passkey}${timestamp}`
@@ -27,7 +30,7 @@ const stkPush = async({token, phoneNumber, amount})=>{
             "PartyA": phoneNumber, 
             "PartyB": shortcode,
             "PhoneNumber": phoneNumber,
-            "CallBackURL": "https://824d-102-209-76-118.ngrok-free.app/payments/callback",
+            "CallBackURL": "https://e43d-102-209-76-118.ngrok-free.app/payments/callback",
             "AccountReference": "LegalEasePay",
             "TransactionDesc": "Payment for Bookings"
         };

@@ -26,6 +26,7 @@ const getCheckout = require('./src/routes/checkoutRoute')
 const cookieParser = require('cookie-parser')
 const authRoutes = require('./src/routes/auth.routes')
 const getStatus = require('./src/routes/payStatus')
+const getAdmindata=require('./src/routes/superadmin.routes')
 
 const documentRoutes = require('./src/routes/documentRoutes')
 const { checkMessageLimit } = require('./src/middleware/messageLimit')
@@ -98,6 +99,7 @@ if(cluster.isPrimary){
     app.use('/api/user', userRoutes)
     app.use('/api/auth', authRoutes)
     app.use('/api/lawyerProfile', lawyerProfile)
+    app.use('/api/admin', getAdmindata)
 
     // M-Pesa Routes
     app.use('/payments/callback', getCallBack)

@@ -28,7 +28,7 @@ const getProfile = async ( userId ) => {
 
 //update the logged-in user profile
 const updateProfile = async (userId, data) => {
-    const allowedFields = ["first_name", "second_name", "dob"];
+    const allowedFields = ["first_name", "second_name", "email", "dob"];
     const updateData = {};
 
     //loop through the allowed fields

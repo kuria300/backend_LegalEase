@@ -56,6 +56,37 @@ const getLawyerById = async (lawyerId) => {
   });
 };
 
+const getLawyerByUserId = async (userId) => {
+  return await db.lawyer_profiles.findFirst({
+    where: {
+      lawyer_applications: {
+        user_id: userId,
+      },
+    },
+    select: {
+      id: true,
+      category: true,
+      phone_number: true,
+      experience: true,
+      consultation_fee: true,
+      description: true,
+      is_active: true,
+      lawyer_applications: {
+        include: {
+          users: {
+            select: {
+              id: true,
+              first_name: true,
+              second_name: true,
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
 const getLawyerByName = async (name) => {
   return await db.lawyer_profiles.findMany({
     where: {
@@ -93,5 +124,6 @@ const getLawyerByName = async (name) => {
 module.exports = {
   getAllLawyers,
   getLawyerById,
-  getLawyerByName
+  getLawyerByName,
+  getLawyerByUserId 
 };
