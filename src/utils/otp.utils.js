@@ -16,6 +16,7 @@ const otpExpiresAt = () => {
 const transporter = nodemailer.createTransport({
   host: gmail.host,
   port: gmail.port,
+  secure: true, // Use SSL
   auth: {
     user: gmail.user,
     pass: gmail.password
