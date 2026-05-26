@@ -51,7 +51,7 @@ const createBooking = async (req, res, next) => {
       data: booking,
     });
   } catch (err) {
-    next(err.message);
+    next(err);
   }
 };
 

@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer")
 const { gmail} = require("../config/emailConfig")
+const ErrorResponse = require("./ErrorObj")
 
 const transporter = nodemailer.createTransport({
   host: gmail.host,
@@ -11,8 +12,9 @@ const transporter = nodemailer.createTransport({
 })
 
 const sendApprovalEmail = async ({ to, name }) => {
+   if (!to) throw new ErrorResponse("sendApprovalEmail: recipient email is required")
   await transporter.sendMail({
-    from: `"LegalEase" <${gmail.host}>`,
+    from: `"LegalEase" <${gmail.user}>`,
     to,
     subject: "Your LegalEase Application Has Been Approved 🎉",
     html: `
@@ -34,7 +36,7 @@ const sendApprovalEmail = async ({ to, name }) => {
               <li>You will be notified when a client books with you</li>
             </ul>
           </div>
-          <a href="${process.env.CLIENT_URL}/dashboard" 
+          <a href="http://localhost/3000/login" 
             style="display: inline-block; background: #000e27; color: #ffffff; padding: 12px 24px; 
             border-radius: 8px; text-decoration: none; font-weight: bold;">
             Go to Dashboard →
@@ -49,8 +51,9 @@ const sendApprovalEmail = async ({ to, name }) => {
 }
 
 const sendRejectionEmail = async ({ to, name }) => {
+  if (!to) throw new ErrorResponse("sendRejectionEmail: recipient email is required")
   await transporter.sendMail({
-    from: `"LegalEase" <${process.env.EMAIL_FROM}>`,
+    from: `"LegalEase" <${gmail.user}>`,
     to,
     subject: "Update on Your LegalEase Application",
     html: `
@@ -68,7 +71,7 @@ const sendRejectionEmail = async ({ to, name }) => {
             You are welcome to reapply. If you believe this decision was made in error, 
             please contact our support team.
           </p>
-          <a href="${process.env.CLIENT_URL}/apply"
+            <a href="http://localhost/3000/register" 
             style="display: inline-block; background: #000e27; color: #ffffff; padding: 12px 24px;
             border-radius: 8px; text-decoration: none; font-weight: bold;">
             Reapply Now →

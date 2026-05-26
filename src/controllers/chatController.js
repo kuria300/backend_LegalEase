@@ -27,7 +27,9 @@ class ChatController {
         try {
             // let userId = id ?req.cookies?.guest_id : req.user.userId
             // Extract message, conversation history and userId from the request body
-            const { message, conversationHistory = [], userId} = req.body;
+            const userId = req.user?.userId || null
+
+            const { message, conversationHistory = [], category='general'} = req.body;
 
             console.log(userId)
 
@@ -48,7 +50,7 @@ class ChatController {
 
             // If user is logged in, save the message and reply to the database via repository
             if (userId) {
-                await chatRepository.saveMessage(userId, message, result.reply);
+                await chatRepository.saveMessage(userId, message, result.reply, category);
             }
 
             // Build the response object with the reply, updated history and usage stats
@@ -84,6 +86,14 @@ class ChatController {
             // Check if a file was uploaded
             if (!file) throw new ErrorResponse('No file uploaded', 400);
 
+             console.log('Upload received:', {
+            originalname: file.originalname,
+            mimetype:     file.mimetype,
+            size:         file.size,
+            hasBuffer:    !!file.buffer,
+            bufferLength: file.buffer?.length,
+        });
+
             // Send the file to documentService for analysis
             const result = await documentService.analyzeDocument(file);
 
@@ -91,15 +101,15 @@ class ChatController {
             // The AI analysis is returned directly to the client
             res.json({ success: true, ...result });
         } catch (err) {
-            next(err.message);
+            next(err);
         }
     }
 
     // async function to get chat history for a logged in user
     async getChatHistory(req, res, next) {
         try {
-            // Get userId from route params and limit from query string
-            const { userId } = req.params;
+            // Get userId from jwt
+            const userId  = req.user.userId;
             const { limit = 50 } = req.query;
 
             // Check if userId is provided
@@ -111,7 +121,7 @@ class ChatController {
             // Send the conversations back to the client
             res.json({ success: true, conversations, count: conversations.length });
         } catch (err) {
-            next(err.message);
+            next(err);
         }
     }
 

@@ -16,10 +16,18 @@ const findByUserId = (userId) => {
 };
 
 //Update password
-const updatePassword = ( userId, hashedPassword )=> {
-    return db.passwords.update({
-        where:{ user_id: userId},
-        data: {password: hashedPassword},
+const updatePassword = (userId, hashedPassword) => {
+    return db.passwords.upsert({
+        where: { 
+            user_id: userId 
+        }, 
+        update: { 
+            password: hashedPassword 
+        },
+        create: { 
+            user_id: userId, 
+            password: hashedPassword 
+        }
     });
 };
 

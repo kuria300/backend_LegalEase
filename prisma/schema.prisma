@@ -131,6 +131,7 @@ enum Role {
   CLIENT
   LAWYER
   ADMIN
+  SUPERADMIN
 }
 
 enum booking_status {

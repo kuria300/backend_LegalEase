@@ -52,7 +52,7 @@ router.post(
 // validateUserId - ensures the userId in the URL is a valid UUID
 // getChatHistory - fetches the last 50 chat messages for the user from the database
 router.get(
-    '/history/:userId',
+    '/history',
     authenticate,
     validateUserId,
     chatController.getChatHistory

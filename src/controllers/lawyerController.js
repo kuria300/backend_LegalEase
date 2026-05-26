@@ -16,7 +16,7 @@ const applyToBeLawyer = async (req, res, next) => {
       category,
       experience,
       phone_number,
-      profile_picture_url,
+      profile_picture_url || null,
     );
 
     if (existingApp) {
@@ -36,7 +36,7 @@ const applyToBeLawyer = async (req, res, next) => {
       category,
       experience,
       phone_number,
-      profile_picture_url,  
+      profile_picture_url: profile_picture_url || null,
     });
 
     res.status(201).json({
