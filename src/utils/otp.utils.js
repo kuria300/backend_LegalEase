@@ -15,7 +15,7 @@ const otpExpiresAt = () => {
 // Handles connection to the email service using Gmail SMTP credentials from config
 const transporter = nodemailer.createTransport({
   host: gmail.host,
-  port: gmail.port,
+  port: 587,
   secure: true, // Use SSL
   auth: {
     user: gmail.user,

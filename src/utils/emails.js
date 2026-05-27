@@ -36,7 +36,7 @@ const sendApprovalEmail = async ({ to, name }) => {
               <li>You will be notified when a client books with you</li>
             </ul>
           </div>
-          <a href="http://localhost/3000/login" 
+          <a href="https://legaleaseafrica.org/__api__/api/auth/login" 
             style="display: inline-block; background: #000e27; color: #ffffff; padding: 12px 24px; 
             border-radius: 8px; text-decoration: none; font-weight: bold;">
             Go to Dashboard →
@@ -71,7 +71,7 @@ const sendRejectionEmail = async ({ to, name }) => {
             You are welcome to reapply. If you believe this decision was made in error, 
             please contact our support team.
           </p>
-            <a href="http://localhost/3000/register" 
+            <a href="https://legaleaseafrica.org/__api__/api/auth/register" 
             style="display: inline-block; background: #000e27; color: #ffffff; padding: 12px 24px;
             border-radius: 8px; text-decoration: none; font-weight: bold;">
             Reapply Now →
