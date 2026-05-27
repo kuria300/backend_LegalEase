@@ -30,7 +30,7 @@ const stkPush = async({token, phoneNumber, amount})=>{
             "PartyA": phoneNumber, 
             "PartyB": shortcode,
             "PhoneNumber": phoneNumber,
-            "CallBackURL": "https://e43d-102-209-76-118.ngrok-free.app/payments/callback",
+            "CallBackURL": "https://legaleaseafrica.org/__api__/payments/callback",
             "AccountReference": "LegalEasePay",
             "TransactionDesc": "Payment for Bookings"
         };
