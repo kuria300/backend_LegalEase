@@ -8,8 +8,9 @@ require('dotenv').config()
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 15,
-    connectionTimeoutMillis: 3000
+    max: 5,
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 20000,
 })
 
 const adapter= new PrismaPg(pool)
