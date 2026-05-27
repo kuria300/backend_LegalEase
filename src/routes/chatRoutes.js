@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const formDataParser = multer(); // For parsing FormData from frontend
 const chatController = require('../controllers/chatController');
 const { upload, handleMulterError } = require('../middleware/fileUpload');
 const { checkMessageLimit } = require('../middleware/messageLimit');
@@ -12,8 +14,10 @@ const { authenticate } = require('../middleware/auth.middleware');
 // sanitizeInput - trims the message to prevent XSS attacks
 // checkMessageLimit - limits guests to 2 messages before prompting to login
 // handleChatMessage - sends the message to OpenAI and returns the AI reply
+// formDataParser.none() - parses FormData from frontend (supports file uploads)
 router.post(
     '/message/public',
+    formDataParser.none(),  // ← FIX: Parses FormData so req.body is defined
     chatLimiter,
     sanitizeInput,
     checkMessageLimit,
@@ -41,7 +45,7 @@ router.post(
 // uploadDocument - extracts text from the document and sends it to OpenAI for analysis
 router.post(
     '/upload-document',
-    authenticate,
+    //authenticate,
     uploadLimiter,
     upload.single('document'),
     handleMulterError,

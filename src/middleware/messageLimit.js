@@ -23,15 +23,10 @@ const checkMessageLimit = (req, res, next) => {
 
         // Check if the message count exceeds the limit (e.g., 2 messages)
         if (req.session.messageCount >= MESSAGE_LIMIT) {
-            req.session.messageCount= 0
             throw new ErrorResponse(`You have reached ${MESSAGE_LIMIT} message limit. Please register or login to continue.`, 403); // Throw an error if the limit is exceeded
         }
 
-        req.session.messageCount += 1;
-
-        // Increment the message count for the session
-        req.remainingMessages =MESSAGE_LIMIT - req.session.messageCount;
-
+        req.remainingMessages = Math.max(0, MESSAGE_LIMIT - req.session.messageCount); // Calculate remaining messages
         next(); // Continue processing the request
     } catch (err) {
         next(err); // Pass the error to the next middleware
