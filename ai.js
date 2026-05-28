@@ -10,7 +10,7 @@ const { openai, testConnection } = require('./src/config/openai');
 // Services
 const chatService = require('./src/services/chatService');
 const documentService = require('./src/services/documentService');
-const ocrService = require('./src/services/ocrService');
+// const ocrService = require('./src/services/ocrService');
 
 // Repositories
 const chatRepository = require('./src/repositories/chat.repository');
@@ -41,7 +41,7 @@ module.exports = {
     // Services
     chatService,
     documentService,
-    ocrService,
+    // ocrService,
 
     // Repositories
     chatRepository,

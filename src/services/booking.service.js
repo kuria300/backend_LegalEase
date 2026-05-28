@@ -54,7 +54,7 @@ const createBookingService = async (data) => {
       user_id,
       lawyer_id,
       booking_date: booking_date,
-      booking_time: convertTimeToDate(booking_time),
+      booking_time: booking_time,
       notes,
       meeting_type: meetingTypeMap[meeting_type] || "Google_Meet"
     });
@@ -247,10 +247,16 @@ const rescheduleBookingService = async (booking_id, new_booking_date, new_bookin
         const rescheduledBooking = await rescheduleBooking({
             booking_id,
             new_booking_date:parsedNewDate,
-            new_booking_time: bookingTimeDate
+            new_booking_time: new_booking_time
        });
 
-        return rescheduledBooking;
+       const lawyer = await db.users.findUnique({
+            where: { id: existingBooking.lawyer_id },
+            select: { email: true, first_name: true },
+        });
+
+        // Attach lawyer info so the controller can send the email
+        return { ...rescheduledBooking, lawyerEmail: lawyer?.email, lawyerName: lawyer?.first_name };
 
     } catch (err) {
         throw err;
