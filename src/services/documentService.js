@@ -3,7 +3,7 @@ const { openai } = require('../config/openai.js');
 //import document model and legal document model
 const { LEGAL_SYSTEM_PROMPT, DOCUMENT_ANALYSIS_PROMPT } = require('../utils/legalPrompts.js');
 const ErrorResponse = require('../utils/ErrorObj.js');
-const ocrService = require('./ocrService.js');
+const {ocrService} = require('./ocrService.js');
 
 //function to analyze document
 class DocumentService {
