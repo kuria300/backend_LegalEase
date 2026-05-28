@@ -4,7 +4,6 @@ const Tesseract     = require('tesseract.js');
 // Run: npm install pdf-parse@1.1.1
 const pdfParse = require('pdf-parse');
 const ErrorResponse = require('../utils/ErrorObj.js');
-const pdfParse = require('pdf-parse');
 
 class OCRService {
 
