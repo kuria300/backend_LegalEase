@@ -8,7 +8,7 @@ require('dotenv').config()
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 5,
+    max: 15,
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 20000,
 })

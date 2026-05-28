@@ -8,6 +8,7 @@ const {
 } = require("../services/booking.service");
 const { getBookingById } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
+const { sendEmail } =require('../utils/rescheduleEmail')
 
 const formatDate = (date) => {
     return new Intl.DateTimeFormat("en-CA", {
@@ -18,14 +19,14 @@ const formatDate = (date) => {
     }).format(new Date(date));
 };
 
-const formatTime = (date) => {
-    return new Intl.DateTimeFormat("en-GB", {
-        timeZone: "Africa/Nairobi",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-    }).format(new Date(date));
-};
+// const formatTime = (date) => {
+//     return new Intl.DateTimeFormat("en-GB", {
+//         timeZone: "Africa/Nairobi",
+//         hour: "2-digit",
+//         minute: "2-digit",
+//         hour12: false
+//     }).format(new Date(date));
+// };
 
 const createBooking = async (req, res, next) => {
   try {
@@ -180,13 +181,31 @@ const rescheduleBooking = async (req, res, next) => {
             parsedNewDate
         );
 
+         if (rescheduledBooking.lawyerEmail) {
+            await sendEmail({
+                to: rescheduledBooking.lawyerEmail,
+                subject: "Booking Rescheduled – Action Required",
+                html: `
+                    <p>Dear ${rescheduledBooking.lawyerName || 'Lawyer'},</p>
+                    <p>A client has rescheduled a booking with you.</p>
+                    <table>
+                        <tr><td><strong>New Date:</strong></td><td>${formatDate(rescheduledBooking.booking_date)}</td></tr>
+                        <tr><td><strong>New Time:</strong></td><td>${rescheduledBooking.booking_time}</td></tr>
+                        <tr><td><strong>Booking ID:</strong></td><td>${rescheduledBooking.id}</td></tr>
+                    </table>
+                    <p>Please log in to your dashboard to review the updated booking.</p>
+                    <p>— LegalEase Africa</p>
+                `,
+            });
+        }
+
         return res.status(200).json({
             success: true,
             message: "Booking rescheduled successfully",
             data: {
               ...rescheduledBooking,
               booking_date: formatDate(rescheduledBooking.booking_date),
-              booking_time: formatTime(rescheduledBooking.booking_time)
+              booking_time: rescheduledBooking.booking_time
             }
         });
 
