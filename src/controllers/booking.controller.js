@@ -8,7 +8,8 @@ const {
 } = require("../services/booking.service");
 const { getBookingById } = require("../repositories/booking.repository");
 const ErrorResponse = require("../utils/ErrorObj");
-const { sendEmail } =require('../utils/rescheduleEmail')
+const { sendEmail } =require('../utils/rescheduleEmail');
+const {db} = require("../config/db");
 
 const formatDate = (date) => {
     return new Intl.DateTimeFormat("en-CA", {
@@ -27,6 +28,40 @@ const formatDate = (date) => {
 //         hour12: false
 //     }).format(new Date(date));
 // };
+const completeBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user_id = req.user.userId;
+
+    const booking = await getBookingById(id);
+
+    if (!booking) {
+      throw new ErrorResponse("Booking not found", 404);
+    }
+
+    if (booking.lawyer_id !== user_id) {
+      throw new ErrorResponse("You are not authorized to complete this booking", 403);
+    }
+
+    if (booking.booking_status !== "CONFIRMED" || booking.payment_status !== "PAID") {
+      throw new ErrorResponse("Only confirmed and paid bookings can be marked as completed", 400);
+    }
+
+    const completed = await db.bookings.update({
+      where: { id },
+      data: { booking_status: "COMPLETED" },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking marked as completed",
+      data: completed,
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
 
 const createBooking = async (req, res, next) => {
   try {
@@ -241,5 +276,6 @@ module.exports = {
   getLawyerBookings,
   getUserBookingById,
   rescheduleBooking,
-  deleteBooking
+  deleteBooking,
+  completeBooking
 };

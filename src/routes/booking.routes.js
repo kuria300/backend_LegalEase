@@ -8,7 +8,8 @@ const {
     getLawyerBookings,
     getUserBookingById,
     rescheduleBooking,  
-    deleteBooking
+    deleteBooking,
+    completeBooking
 } = require("../controllers/booking.controller");
 const { 
     validateCreateBooking,
@@ -38,5 +39,7 @@ router.put("/user/reschedule/:id", authenticate, validateRescheduleBooking, resc
 
 //DELETE /api/bookings/user/:id
 router.delete("/user/:id", authenticate, deleteBooking);
+
+router.patch('/:id/complete', authenticate, completeBooking);
 
 module.exports = router;
